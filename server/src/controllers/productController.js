@@ -5,6 +5,7 @@ import {
   deleteProduct,
   getAdminProductById,
   getAdminProducts,
+  getFeaturedProducts,
   getPublicProductById,
   getPublicProducts,
   updateProduct,
@@ -44,6 +45,24 @@ const mapProductBody = (body, files) => {
       body.isActive === undefined
         ? undefined
         : body.isActive === true || body.isActive === 'true',
+    isTrending:
+      body.isTrending === undefined
+        ? undefined
+        : body.isTrending === true || body.isTrending === 'true',
+    isGovernmentSubsidy:
+      body.isGovernmentSubsidy === undefined
+        ? undefined
+        : body.isGovernmentSubsidy === true ||
+          body.isGovernmentSubsidy === 'true',
+    isOnSale:
+      body.isOnSale === undefined
+        ? undefined
+        : body.isOnSale === true || body.isOnSale === 'true',
+    saleDiscountPercent:
+      body.saleDiscountPercent === undefined ||
+      body.saleDiscountPercent === ''
+        ? undefined
+        : body.saleDiscountPercent,
     existingImages: parseExistingImages(body.existingImages),
     imageFiles,
     videoFile,
@@ -59,6 +78,15 @@ export const getPublicProductsHandler = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     data: { products },
+  });
+});
+
+export const getFeaturedProductsHandler = catchAsync(async (_req, res) => {
+  const data = await getFeaturedProducts();
+
+  res.status(200).json({
+    success: true,
+    data,
   });
 });
 

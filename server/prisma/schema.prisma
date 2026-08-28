@@ -45,6 +45,10 @@ model Product {
   specifications  Json?
   warranty        String
   isActive        Boolean  @default(true)
+  isTrending      Boolean  @default(false)
+  isGovernmentSubsidy Boolean @default(false)
+  isOnSale        Boolean  @default(false)
+  saleDiscountPercent Float?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -52,6 +56,8 @@ model Product {
 
   @@index([categoryId])
   @@index([isActive])
+  @@index([isTrending])
+  @@index([isGovernmentSubsidy])
 }
 
 model ContactEnquiry {

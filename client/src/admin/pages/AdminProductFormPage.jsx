@@ -51,6 +51,10 @@ export default function AdminProductFormPage() {
     stock: '0',
     warranty: '',
     isActive: true,
+    isTrending: false,
+    isGovernmentSubsidy: false,
+    isOnSale: false,
+    saleDiscountPercent: '',
   });
   const [specRows, setSpecRows] = useState([emptySpecRow()]);
   const [existingImages, setExistingImages] = useState([]);
@@ -82,6 +86,13 @@ export default function AdminProductFormPage() {
       stock: String(product.stock ?? 0),
       warranty: product.warranty,
       isActive: product.isActive,
+      isTrending: product.isTrending ?? false,
+      isGovernmentSubsidy: product.isGovernmentSubsidy ?? false,
+      isOnSale: product.isOnSale ?? false,
+      saleDiscountPercent:
+        product.saleDiscountPercent != null
+          ? String(product.saleDiscountPercent)
+          : '',
     });
 
     const specs = product.specifications
@@ -152,6 +163,15 @@ export default function AdminProductFormPage() {
 
     if (totalImages > MAX_IMAGES) {
       nextErrors.images = `Maximum ${MAX_IMAGES} images allowed`;
+    }
+
+    if (form.isOnSale) {
+      const salePercent = Number(form.saleDiscountPercent);
+      if (!form.saleDiscountPercent || Number.isNaN(salePercent)) {
+        nextErrors.saleDiscountPercent = 'Enter a valid sale discount percentage';
+      } else if (salePercent <= 0 || salePercent >= 100) {
+        nextErrors.saleDiscountPercent = 'Sale discount must be between 1 and 99';
+      }
     }
 
     setErrors(nextErrors);
@@ -262,6 +282,12 @@ export default function AdminProductFormPage() {
     formData.append('warranty', form.warranty.trim());
     formData.append('specifications', JSON.stringify(specificationsObject));
     formData.append('isActive', String(form.isActive));
+    formData.append('isTrending', String(form.isTrending));
+    formData.append('isGovernmentSubsidy', String(form.isGovernmentSubsidy));
+    formData.append('isOnSale', String(form.isOnSale));
+    if (form.isOnSale) {
+      formData.append('saleDiscountPercent', form.saleDiscountPercent);
+    }
 
     newImageFiles.forEach((file) => {
       formData.append('images', file);
@@ -437,6 +463,93 @@ export default function AdminProductFormPage() {
               Product is active on the shop
             </label>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+          <h3 className="text-sm font-semibold text-slate-800">
+            Featured on Homepage
+          </h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Control where this product appears on the home page. Both can be enabled.
+          </p>
+          <div className="mt-4 space-y-3">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={form.isTrending}
+                onChange={(event) =>
+                  updateField('isTrending', event.target.checked)
+                }
+                className="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+              />
+              <span className="text-sm font-medium text-slate-700">
+                Trending Product
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={form.isGovernmentSubsidy}
+                onChange={(event) =>
+                  updateField('isGovernmentSubsidy', event.target.checked)
+                }
+                className="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+              />
+              <span className="text-sm font-medium text-slate-700">
+                Government Subsidy Product
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+          <h3 className="text-sm font-semibold text-slate-800">On Sale</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Highlight promotional products with a visible sale badge on the shop
+            and product pages.
+          </p>
+          <label className="mt-4 flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={form.isOnSale}
+              onChange={(event) => {
+                updateField('isOnSale', event.target.checked);
+                if (!event.target.checked) {
+                  updateField('saleDiscountPercent', '');
+                  setErrors((current) => ({
+                    ...current,
+                    saleDiscountPercent: '',
+                  }));
+                }
+              }}
+              className="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+            />
+            <span className="text-sm font-medium text-slate-700">On Sale</span>
+          </label>
+
+          {form.isOnSale && (
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Sale Discount (%) *
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                value={form.saleDiscountPercent}
+                onChange={(event) =>
+                  updateField('saleDiscountPercent', event.target.value)
+                }
+                className="w-full max-w-xs rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                placeholder="20"
+              />
+              {errors.saleDiscountPercent && (
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.saleDiscountPercent}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div>

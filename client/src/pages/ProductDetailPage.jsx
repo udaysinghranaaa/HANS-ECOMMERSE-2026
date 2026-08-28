@@ -6,10 +6,10 @@ import {
   Loader2,
   PlayCircle,
   Shield,
-  Tag,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/shop/ProductCard';
+import { ProductDetailBadges } from '@/components/shop/ProductBadges';
 import { useGetPublicProductByIdQuery } from '@/services/productsApi';
 import { formatCurrency } from '@/utils/format';
 
@@ -24,7 +24,6 @@ export default function ProductDetailPage() {
   const specifications = product?.specifications
     ? Object.entries(product.specifications)
     : [];
-  const discountLabel = `${product?.discountPercent ?? 18}% OFF`;
 
   if (isLoading) {
     return (
@@ -135,10 +134,7 @@ export default function ProductDetailPage() {
             </h1>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-sm font-bold text-white">
-                <Tag className="h-4 w-4" />
-                {discountLabel}
-              </span>
+              <ProductDetailBadges product={product} />
               {product.stock > 0 ? (
                 <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
                   <CheckCircle2 className="h-4 w-4" />

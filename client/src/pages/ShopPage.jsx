@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, PackageOpen, ShoppingBag } from 'lucide-react';
+import { Loader2, PackageOpen } from 'lucide-react';
+import CategoryHero from '@/components/shop/CategoryHero';
 import ProductCard from '@/components/shop/ProductCard';
 import { useGetPublicCategoriesQuery } from '@/services/categoriesApi';
 import { useGetPublicProductsQuery } from '@/services/productsApi';
@@ -29,24 +30,7 @@ export default function ShopPage() {
 
   return (
     <div className="bg-gray-50">
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 text-solar-600">
-            <ShoppingBag className="h-6 w-6" />
-            <span className="text-sm font-semibold uppercase tracking-wider">
-              HANS Solar Shop
-            </span>
-          </div>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-charcoal sm:text-4xl">
-            {activeCategory ? activeCategory.name : 'All Solar Products'}
-          </h1>
-          <p className="mt-3 max-w-2xl text-base text-charcoal-light sm:text-lg">
-            {activeCategory
-              ? activeCategory.description
-              : 'Browse our complete range of solar panels, inverters, batteries and accessories with exclusive online discounts.'}
-          </p>
-        </div>
-      </section>
+      <CategoryHero category={activeCategory} />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap gap-2">

@@ -1,39 +1,10 @@
 export const navLinks = [
   { label: 'Home', path: '/' },
+  { label: 'Shop', path: '/shop' },
   { label: 'Contact', path: '/contact' },
 ];
 
 export const navDropdowns = [
-  {
-    label: 'Shop',
-    items: [
-      {
-        label: 'All Products',
-        path: '/shop',
-        description: 'Browse our complete solar product catalogue',
-      },
-      {
-        label: 'Solar Panels',
-        path: '/shop/solar-panels',
-        description: 'High-efficiency panels for every application',
-      },
-      {
-        label: 'Solar Inverters',
-        path: '/shop/solar-inverters',
-        description: 'On-grid, off-grid and hybrid inverters',
-      },
-      {
-        label: 'Solar Batteries',
-        path: '/shop/solar-batteries',
-        description: 'Reliable energy storage solutions',
-      },
-      {
-        label: 'Solar Accessories',
-        path: '/shop/solar-accessories',
-        description: 'Mounting, cabling and system essentials',
-      },
-    ],
-  },
   {
     label: 'Learn',
     items: [
@@ -133,33 +104,6 @@ export const whyChooseBenefits = [
     title: 'Professional Installation Support',
     description: 'Structured installation assistance for safe and compliant deployments.',
     icon: 'Wrench',
-  },
-];
-
-export const productCategories = [
-  {
-    name: 'Solar Panels',
-    slug: 'solar-panels',
-    description: 'Monocrystalline and bifacial panels for homes and businesses.',
-    icon: 'Sun',
-  },
-  {
-    name: 'Solar Inverters',
-    slug: 'solar-inverters',
-    description: 'On-grid, off-grid and hybrid inverters for every requirement.',
-    icon: 'Zap',
-  },
-  {
-    name: 'Solar Batteries',
-    slug: 'solar-batteries',
-    description: 'Lithium storage systems for backup and energy management.',
-    icon: 'BatteryCharging',
-  },
-  {
-    name: 'Solar Accessories',
-    slug: 'solar-accessories',
-    description: 'Mounting structures, cables, connectors and system essentials.',
-    icon: 'Package',
   },
 ];
 

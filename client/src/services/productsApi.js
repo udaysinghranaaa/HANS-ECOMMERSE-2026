@@ -20,6 +20,11 @@ export const productsApi = api.injectEndpoints({
       query: (id) => `/catalog/products/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Products', id }],
     }),
+    getFeaturedProducts: builder.query({
+      query: () => '/catalog/products/featured',
+      providesTags: [{ type: 'Products', id: 'FEATURED' }],
+      keepUnusedDataFor: 30,
+    }),
     getAdminProducts: builder.query({
       query: () => '/admin/catalog/products',
       providesTags: (result) =>
@@ -40,7 +45,11 @@ export const productsApi = api.injectEndpoints({
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: [{ type: 'Products', id: 'LIST' }, { type: 'Products', id: 'ADMIN_LIST' }],
+      invalidatesTags: [
+        { type: 'Products', id: 'LIST' },
+        { type: 'Products', id: 'ADMIN_LIST' },
+        { type: 'Products', id: 'FEATURED' },
+      ],
     }),
     updateProduct: builder.mutation({
       query: ({ id, formData }) => ({
@@ -52,6 +61,7 @@ export const productsApi = api.injectEndpoints({
         { type: 'Products', id },
         { type: 'Products', id: 'LIST' },
         { type: 'Products', id: 'ADMIN_LIST' },
+        { type: 'Products', id: 'FEATURED' },
       ],
     }),
     deleteProduct: builder.mutation({
@@ -59,7 +69,11 @@ export const productsApi = api.injectEndpoints({
         url: `/admin/catalog/products/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: [{ type: 'Products', id: 'LIST' }, { type: 'Products', id: 'ADMIN_LIST' }],
+      invalidatesTags: [
+        { type: 'Products', id: 'LIST' },
+        { type: 'Products', id: 'ADMIN_LIST' },
+        { type: 'Products', id: 'FEATURED' },
+      ],
     }),
   }),
 });
@@ -67,6 +81,7 @@ export const productsApi = api.injectEndpoints({
 export const {
   useGetPublicProductsQuery,
   useGetPublicProductByIdQuery,
+  useGetFeaturedProductsQuery,
   useGetAdminProductsQuery,
   useGetAdminProductByIdQuery,
   useCreateProductMutation,

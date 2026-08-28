@@ -6,6 +6,7 @@ import AdminDashboardPage from '@/admin/pages/AdminDashboardPage';
 import AdminProductsPage from '@/admin/pages/AdminProductsPage';
 import AdminProductFormPage from '@/admin/pages/AdminProductFormPage';
 import AdminCategoriesPage from '@/admin/pages/AdminCategoriesPage';
+import AdminCategoryFormPage from '@/admin/pages/AdminCategoryFormPage';
 import AdminEnquiriesPage from '@/admin/pages/AdminEnquiriesPage';
 import AdminSettingsPage from '@/admin/pages/AdminSettingsPage';
 import AdminBannerManagementPage from '@/admin/pages/AdminBannerManagementPage';
@@ -23,6 +24,8 @@ export default function AdminRoutes() {
           <Route path="products/new" element={<AdminProductFormPage />} />
           <Route path="products/:id/edit" element={<AdminProductFormPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
+          <Route path="categories/new" element={<AdminCategoryFormPage />} />
+          <Route path="categories/:id/edit" element={<AdminCategoryFormPage />} />
           <Route path="enquiries" element={<AdminEnquiriesPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
           <Route

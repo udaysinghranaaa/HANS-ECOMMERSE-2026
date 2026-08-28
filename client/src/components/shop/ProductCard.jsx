@@ -1,17 +1,17 @@
-import { ArrowRight, Tag } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/ui/Button';
+import { ProductCardBadges } from '@/components/shop/ProductBadges';
 import { formatCurrency } from '@/utils/format';
 
 export default function ProductCard({ product }) {
   const imageUrl = product.images?.[0] || '';
-  const discountLabel = `${product.discountPercent ?? 18}% OFF`;
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <Link
         to={`/shop/product/${product.id}`}
-        className="relative block aspect-[4/3] overflow-hidden bg-gray-100"
+        className="relative isolate block aspect-[4/3] overflow-hidden bg-gray-100"
       >
         {imageUrl ? (
           <img
@@ -25,10 +25,7 @@ export default function ProductCard({ product }) {
             No image
           </div>
         )}
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
-          <Tag className="h-3 w-3" />
-          {discountLabel}
-        </span>
+        <ProductCardBadges product={product} />
       </Link>
 
       <div className="flex flex-1 flex-col p-5">

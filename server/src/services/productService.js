@@ -25,6 +25,20 @@ const toAbsoluteMediaUrl = (mediaUrl, updatedAt) => {
 const calculateDiscountedPrice = (price, discountPercent) =>
   Math.round(price * (1 - discountPercent / 100));
 
+const normalizeSaleFields = (isOnSale, saleDiscountPercent) => {
+  if (!isOnSale) {
+    return { isOnSale: false, saleDiscountPercent: null };
+  }
+
+  const percent = Number(saleDiscountPercent);
+
+  if (!Number.isFinite(percent) || percent <= 0 || percent >= 100) {
+    throw new ApiError(400, 'Sale discount must be between 1 and 99 percent');
+  }
+
+  return { isOnSale: true, saleDiscountPercent: percent };
+};
+
 const parseSpecifications = (value) => {
   if (!value) {
     return {};
@@ -64,6 +78,10 @@ const formatProduct = (product, { includeCategory = true } = {}) => {
     specifications: product.specifications || {},
     warranty: product.warranty,
     isActive: product.isActive,
+    isTrending: product.isTrending,
+    isGovernmentSubsidy: product.isGovernmentSubsidy,
+    isOnSale: product.isOnSale ?? false,
+    saleDiscountPercent: product.saleDiscountPercent ?? null,
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   };
@@ -99,6 +117,28 @@ export const getPublicProducts = async ({ categorySlug } = {}) => {
   });
 
   return products.map((product) => formatProduct(product));
+};
+
+export const getFeaturedProducts = async () => {
+  const baseWhere = { isActive: true };
+
+  const [trendingProducts, subsidyProducts] = await Promise.all([
+    prisma.product.findMany({
+      where: { ...baseWhere, isTrending: true },
+      include: productInclude,
+      orderBy: { updatedAt: 'desc' },
+    }),
+    prisma.product.findMany({
+      where: { ...baseWhere, isGovernmentSubsidy: true },
+      include: productInclude,
+      orderBy: { updatedAt: 'desc' },
+    }),
+  ]);
+
+  return {
+    trendingProducts: trendingProducts.map((product) => formatProduct(product)),
+    subsidyProducts: subsidyProducts.map((product) => formatProduct(product)),
+  };
 };
 
 export const getPublicProductById = async (id) => {
@@ -159,6 +199,11 @@ export const createProduct = async ({
   stock = 0,
   specifications,
   warranty,
+  isActive = true,
+  isTrending = false,
+  isGovernmentSubsidy = false,
+  isOnSale = false,
+  saleDiscountPercent = null,
   imageFiles = [],
   videoFile = null,
 }) => {
@@ -193,6 +238,7 @@ export const createProduct = async ({
 
   const images = imageFiles.map((file) => buildProductImageUrl(file.filename));
   const videoUrl = videoFile ? buildProductVideoUrl(videoFile.filename) : null;
+  const saleFields = normalizeSaleFields(isOnSale, saleDiscountPercent);
 
   const product = await prisma.product.create({
     data: {
@@ -206,7 +252,10 @@ export const createProduct = async ({
       stock: Number(stock) || 0,
       specifications: parseSpecifications(specifications),
       warranty: warranty.trim(),
-      isActive: true,
+      isActive,
+      isTrending,
+      isGovernmentSubsidy,
+      ...saleFields,
     },
     include: productInclude,
   });
@@ -226,6 +275,10 @@ export const updateProduct = async (
     specifications,
     warranty,
     isActive,
+    isTrending,
+    isGovernmentSubsidy,
+    isOnSale,
+    saleDiscountPercent,
     existingImages = [],
     imageFiles = [],
     videoFile = null,
@@ -274,6 +327,14 @@ export const updateProduct = async (
     }
   }
 
+  const saleUpdate =
+    isOnSale !== undefined
+      ? normalizeSaleFields(
+          isOnSale,
+          saleDiscountPercent ?? existingProduct.saleDiscountPercent,
+        )
+      : {};
+
   const product = await prisma.product.update({
     where: { id },
     data: {
@@ -290,6 +351,9 @@ export const updateProduct = async (
         : {}),
       ...(warranty !== undefined ? { warranty: warranty.trim() } : {}),
       ...(isActive !== undefined ? { isActive } : {}),
+      ...(isTrending !== undefined ? { isTrending } : {}),
+      ...(isGovernmentSubsidy !== undefined ? { isGovernmentSubsidy } : {}),
+      ...saleUpdate,
       images: mergedImages,
       videoUrl,
     },
