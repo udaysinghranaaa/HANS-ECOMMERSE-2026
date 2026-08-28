@@ -1,0 +1,28 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import AdminLayout from '@/admin/components/layout/AdminLayout';
+import AdminProtectedRoute from '@/admin/routes/AdminProtectedRoute';
+import AdminLoginPage from '@/admin/pages/AdminLoginPage';
+import AdminDashboardPage from '@/admin/pages/AdminDashboardPage';
+import AdminProductsPage from '@/admin/pages/AdminProductsPage';
+import AdminCategoriesPage from '@/admin/pages/AdminCategoriesPage';
+import AdminEnquiriesPage from '@/admin/pages/AdminEnquiriesPage';
+import AdminSettingsPage from '@/admin/pages/AdminSettingsPage';
+
+export default function AdminRoutes() {
+  return (
+    <Routes>
+      <Route path="login" element={<AdminLoginPage />} />
+
+      <Route element={<AdminProtectedRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="categories" element={<AdminCategoriesPage />} />
+          <Route path="enquiries" element={<AdminEnquiriesPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
+        </Route>
+      </Route>
+    </Routes>
+  );
+}

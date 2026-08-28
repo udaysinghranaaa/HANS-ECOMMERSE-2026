@@ -1,0 +1,42 @@
+import { createSlice } from '@reduxjs/toolkit';
+
+const AUTH_STORAGE_KEY = 'hans_solar_admin_auth';
+
+const loadStoredAuth = () => {
+  try {
+    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
+const storedAuth = loadStoredAuth();
+
+const initialState = {
+  isAuthenticated: Boolean(storedAuth),
+  admin: storedAuth?.admin ?? null,
+};
+
+const adminAuthSlice = createSlice({
+  name: 'adminAuth',
+  initialState,
+  reducers: {
+    login: (state, action) => {
+      state.isAuthenticated = true;
+      state.admin = action.payload;
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({ admin: action.payload }),
+      );
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.admin = null;
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    },
+  },
+});
+
+export const { login, logout } = adminAuthSlice.actions;
+export default adminAuthSlice.reducer;

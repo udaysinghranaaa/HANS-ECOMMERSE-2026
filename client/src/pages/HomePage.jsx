@@ -1,10 +1,21 @@
+import Hero from '@/components/home/Hero';
+import FeatureSection from '@/components/home/FeatureSection';
+import WhyChooseUs from '@/components/home/WhyChooseUs';
+import ProductShowcase from '@/components/home/ProductShowcase';
+import DistributorCTA from '@/components/home/DistributorCTA';
+import LearnSection from '@/components/home/LearnSection';
+import ContactCTA from '@/components/home/ContactCTA';
+
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold">HANS Solar</h1>
-        <p className="mt-2 text-neutral-600">Frontend setup successful</p>
-      </div>
-    </div>
+    <>
+      <Hero />
+      <FeatureSection />
+      <WhyChooseUs />
+      <ProductShowcase />
+      <DistributorCTA />
+      <LearnSection />
+      <ContactCTA />
+    </>
   );
 }

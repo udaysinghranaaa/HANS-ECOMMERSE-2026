@@ -1,6 +1,6 @@
 import dns from 'dns';
-import mongoose from 'mongoose';
 import config from './index.js';
+import prisma from './prisma.js';
 
 export const connectDatabase = async () => {
   const uri = config.mongodbUri;
@@ -15,9 +15,11 @@ export const connectDatabase = async () => {
     dns.setDefaultResultOrder('ipv4first');
   }
 
-  await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 10000,
-  });
+  await prisma.$connect();
 
-  console.log(`MongoDB connected: ${mongoose.connection.host}`);
+  console.log('MongoDB connected via Prisma');
+};
+
+export const disconnectDatabase = async () => {
+  await prisma.$disconnect();
 };
