@@ -20,6 +20,7 @@ enum EnquiryStatus {
 model Category {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
+  slug        String   @unique
   description String
   image       String
   isActive    Boolean  @default(true)
@@ -32,17 +33,20 @@ model Category {
 }
 
 model Product {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  description    String
-  price          Float
-  images         String[]
-  categoryId     String   @db.ObjectId
-  stock          Int      @default(0)
-  specifications Json?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  description     String
+  price           Float
+  discountPercent Float    @default(18)
+  images          String[]
+  videoUrl        String?
+  categoryId      String   @db.ObjectId
+  stock           Int      @default(0)
+  specifications  Json?
+  warranty        String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   category Category @relation(fields: [categoryId], references: [id])
 

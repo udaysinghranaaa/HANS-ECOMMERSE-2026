@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import AdminRoutes from '@/admin/routes/AdminRoutes';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HomePage from '@/pages/HomePage';
+import ShopPage from '@/pages/ShopPage';
+import ProductDetailPage from '@/pages/ProductDetailPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
 
 const placeholder = (title, description, ctaLabel, ctaPath) => (
@@ -24,24 +26,9 @@ export default function AppRoutes() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route
-          path="/shop"
-          element={placeholder(
-            'Shop',
-            'Browse our complete range of solar panels, inverters, batteries and accessories.',
-            'Explore Homepage',
-            '/',
-          )}
-        />
-        <Route
-          path="/shop/:category"
-          element={placeholder(
-            'Product Category',
-            'Product listings for this category will appear here once connected to the backend API.',
-            'View All Categories',
-            '/shop',
-          )}
-        />
+        <Route path="/shop/product/:id" element={<ProductDetailPage />} />
+        <Route path="/shop/:category" element={<ShopPage />} />
+        <Route path="/shop" element={<ShopPage />} />
         <Route
           path="/contact"
           element={placeholder(

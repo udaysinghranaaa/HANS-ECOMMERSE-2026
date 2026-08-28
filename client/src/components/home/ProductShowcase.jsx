@@ -20,8 +20,8 @@ export default function ProductShowcase() {
             Explore Our Solar Products
           </h2>
           <p className="mt-4 text-base text-charcoal-light sm:text-lg">
-            Browse our product categories — ready to connect with your backend
-            catalogue when APIs are integrated.
+            Browse our product categories and explore solar solutions for every
+            need.
           </p>
         </div>
 
