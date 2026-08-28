@@ -1,10 +1,12 @@
 import app from './app.js';
 import config from './config/index.js';
 import { connectDatabase } from './config/database.js';
+import { ensureDefaultAdmin } from './services/adminAuthService.js';
 
 const startServer = async () => {
   try {
     await connectDatabase();
+    await ensureDefaultAdmin();
 
     const server = app.listen(config.port);
 

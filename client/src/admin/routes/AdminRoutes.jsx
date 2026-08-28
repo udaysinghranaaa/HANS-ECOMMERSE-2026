@@ -7,6 +7,7 @@ import AdminProductsPage from '@/admin/pages/AdminProductsPage';
 import AdminCategoriesPage from '@/admin/pages/AdminCategoriesPage';
 import AdminEnquiriesPage from '@/admin/pages/AdminEnquiriesPage';
 import AdminSettingsPage from '@/admin/pages/AdminSettingsPage';
+import AdminBannerManagementPage from '@/admin/pages/AdminBannerManagementPage';
 
 export default function AdminRoutes() {
   return (
@@ -21,6 +22,10 @@ export default function AdminRoutes() {
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="enquiries" element={<AdminEnquiriesPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
+          <Route
+            path="homepage/banners"
+            element={<AdminBannerManagementPage />}
+          />
         </Route>
       </Route>
     </Routes>

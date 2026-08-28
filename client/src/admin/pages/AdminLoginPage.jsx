@@ -6,13 +6,10 @@ import { Eye, EyeOff, Lock, Mail, Sun } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { login } from '@/admin/store/adminAuthSlice';
-import { MOCK_ADMIN_CREDENTIALS } from '@/admin/constants/auth';
+import { useAdminLoginMutation } from '@/services/adminAuthApi';
 
 const loginSchema = z.object({
-  identifier: z
-    .string()
-    .min(1, 'Email or username is required')
-    .max(120, 'Email or username is too long'),
+  email: z.string().trim().email('A valid admin email is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -23,6 +20,7 @@ export default function AdminLoginPage() {
   const isAuthenticated = useSelector(
     (state) => state.adminAuth.isAuthenticated,
   );
+  const [adminLogin] = useAdminLoginMutation();
 
   const {
     register,
@@ -32,7 +30,7 @@ export default function AdminLoginPage() {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      identifier: '',
+      email: '',
       password: '',
     },
   });
@@ -41,26 +39,26 @@ export default function AdminLoginPage() {
     return <Navigate to="/admin/dashboard" replace />;
   }
 
-  const onSubmit = (values) => {
-    const email = values.identifier.trim().toLowerCase();
+  const onSubmit = async (values) => {
+    try {
+      const response = await adminLogin({
+        email: values.email.trim().toLowerCase(),
+        password: values.password,
+      }).unwrap();
 
-    if (
-      email !== MOCK_ADMIN_CREDENTIALS.email ||
-      values.password !== MOCK_ADMIN_CREDENTIALS.password
-    ) {
+      dispatch(
+        login({
+          admin: response.data.admin,
+          token: response.data.token,
+        }),
+      );
+      navigate('/admin/dashboard', { replace: true });
+    } catch (error) {
       setError('root', {
-        message: 'Invalid email or password. Please try again.',
+        message:
+          error?.data?.message || 'Invalid email or password. Please try again.',
       });
-      return;
     }
-
-    dispatch(
-      login({
-        name: MOCK_ADMIN_CREDENTIALS.name,
-        email: MOCK_ADMIN_CREDENTIALS.email,
-      }),
-    );
-    navigate('/admin/dashboard', { replace: true });
   };
 
   return (
@@ -106,10 +104,10 @@ export default function AdminLoginPage() {
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
             <div>
               <label
-                htmlFor="identifier"
+                htmlFor="email"
                 className="mb-2 block text-sm font-medium text-slate-300"
               >
-                Email or Username
+                Email
               </label>
               <div className="relative">
                 <Mail
@@ -117,18 +115,16 @@ export default function AdminLoginPage() {
                   aria-hidden="true"
                 />
                 <input
-                  id="identifier"
-                  type="text"
+                  id="email"
+                  type="email"
                   autoComplete="username"
                   placeholder="hanssolarenergy@gmail.com"
                   className="w-full rounded-xl border border-slate-700 bg-slate-800 py-3 pl-11 pr-4 text-white placeholder:text-slate-500 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
-                  {...register('identifier')}
+                  {...register('email')}
                 />
               </div>
-              {errors.identifier && (
-                <p className="mt-1.5 text-sm text-red-400">
-                  {errors.identifier.message}
-                </p>
+              {errors.email && (
+                <p className="mt-1.5 text-sm text-red-400">{errors.email.message}</p>
               )}
             </div>
 
@@ -188,7 +184,7 @@ export default function AdminLoginPage() {
           </form>
 
           <p className="mt-6 text-center text-xs text-slate-500">
-            Use your admin email and password to sign in.
+            Secure admin access powered by the HANS Solar backend.
           </p>
         </div>
       </div>

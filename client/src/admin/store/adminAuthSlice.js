@@ -14,8 +14,9 @@ const loadStoredAuth = () => {
 const storedAuth = loadStoredAuth();
 
 const initialState = {
-  isAuthenticated: Boolean(storedAuth),
+  isAuthenticated: Boolean(storedAuth?.token),
   admin: storedAuth?.admin ?? null,
+  token: storedAuth?.token ?? null,
 };
 
 const adminAuthSlice = createSlice({
@@ -24,15 +25,20 @@ const adminAuthSlice = createSlice({
   reducers: {
     login: (state, action) => {
       state.isAuthenticated = true;
-      state.admin = action.payload;
+      state.admin = action.payload.admin;
+      state.token = action.payload.token;
       localStorage.setItem(
         AUTH_STORAGE_KEY,
-        JSON.stringify({ admin: action.payload }),
+        JSON.stringify({
+          admin: action.payload.admin,
+          token: action.payload.token,
+        }),
       );
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.admin = null;
+      state.token = null;
       localStorage.removeItem(AUTH_STORAGE_KEY);
     },
   },

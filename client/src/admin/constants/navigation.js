@@ -1,12 +1,28 @@
-const navItems = [
-  { label: 'Dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard' },
-  { label: 'Products', path: '/admin/products', icon: 'Package' },
-  { label: 'Categories', path: '/admin/categories', icon: 'Layers' },
-  { label: 'Enquiries', path: '/admin/enquiries', icon: 'MessageSquare' },
-  { label: 'Settings', path: '/admin/settings', icon: 'Settings' },
+const navSections = [
+  {
+    items: [
+      { label: 'Dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard' },
+      { label: 'Products', path: '/admin/products', icon: 'Package' },
+      { label: 'Categories', path: '/admin/categories', icon: 'Layers' },
+      { label: 'Enquiries', path: '/admin/enquiries', icon: 'MessageSquare' },
+      { label: 'Settings', path: '/admin/settings', icon: 'Settings' },
+    ],
+  },
+  {
+    section: 'Homepage',
+    items: [
+      {
+        label: 'Banner Management',
+        path: '/admin/homepage/banners',
+        icon: 'Image',
+      },
+    ],
+  },
 ];
 
-export { navItems };
+const navItems = navSections.flatMap(({ items }) => items);
+
+export { navItems, navSections };
 
 export const getPageTitle = (pathname) => {
   const item = navItems.find((nav) => nav.path === pathname);

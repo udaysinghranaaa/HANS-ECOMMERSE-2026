@@ -5,8 +5,13 @@ export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: config.apiUrl,
-    prepareHeaders: (headers) => {
-      // Future: attach authentication token from Redux state
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().adminAuth?.token;
+
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
       return headers;
     },
   }),
@@ -21,6 +26,7 @@ export const api = createApi({
     'Wishlist',
     'Payments',
     'Admin',
+    'HomepageBanner',
   ],
   endpoints: () => ({}),
 });

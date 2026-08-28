@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import {
+  Image,
   Layers,
   LayoutDashboard,
   LogOut,
@@ -9,7 +10,7 @@ import {
   Sun,
   X,
 } from 'lucide-react';
-import { navItems } from '@/admin/constants/navigation';
+import { navSections } from '@/admin/constants/navigation';
 
 const iconMap = {
   LayoutDashboard,
@@ -17,6 +18,7 @@ const iconMap = {
   Layers,
   MessageSquare,
   Settings,
+  Image,
 };
 
 export default function AdminSidebar({ isOpen, onClose, onLogout }) {
@@ -56,27 +58,38 @@ export default function AdminSidebar({ isOpen, onClose, onLogout }) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {navItems.map(({ label, path, icon }) => {
-            const Icon = iconMap[icon];
-            return (
-              <NavLink
-                key={path}
-                to={path}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-amber-500 text-slate-900'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`
-                }
-              >
-                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                {label}
-              </NavLink>
-            );
-          })}
+        <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-4">
+          {navSections.map(({ section, items }) => (
+            <div key={section ?? 'main'}>
+              {section && (
+                <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  {section}
+                </p>
+              )}
+              <div className="space-y-1">
+                {items.map(({ label, path, icon }) => {
+                  const Icon = iconMap[icon];
+                  return (
+                    <NavLink
+                      key={path}
+                      to={path}
+                      onClick={onClose}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-amber-500 text-slate-900'
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        }`
+                      }
+                    >
+                      <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                      {label}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className="border-t border-slate-800 p-3">

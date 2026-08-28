@@ -7,7 +7,9 @@ import config from './config/index.js';
 import rateLimiter from './middleware/rateLimiter.js';
 import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
+import uploadErrorHandler from './middleware/uploadErrorHandler.js';
 import routes from './routes/index.js';
+import { uploadsRoot } from './utils/fileUpload.js';
 
 const app = express();
 
@@ -19,12 +21,28 @@ app.use(
     credentials: true,
   }),
 );
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
 app.use(morgan(config.env === 'development' ? 'dev' : 'combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(rateLimiter);
+
+app.use(
+  '/uploads',
+  express.static(uploadsRoot, {
+    maxAge: config.env === 'production' ? '7d' : 0,
+    setHeaders: (res) => {
+      if (config.env !== 'production') {
+        res.setHeader('Cache-Control', 'no-store');
+      }
+    },
+  }),
+);
 
 app.get('/', (_req, res) => {
   res.type('html').send(`<!DOCTYPE html>
@@ -61,6 +79,7 @@ app.get('/', (_req, res) => {
 
 app.use('/api/v1', routes);
 
+app.use(uploadErrorHandler);
 app.use(notFound);
 app.use(errorHandler);
 
