@@ -49,6 +49,8 @@ export const productsApi = api.injectEndpoints({
         { type: 'Products', id: 'LIST' },
         { type: 'Products', id: 'ADMIN_LIST' },
         { type: 'Products', id: 'FEATURED' },
+        { type: 'Festival', id: 'ACTIVE' },
+        { type: 'Festival', id: 'ADMIN_LIST' },
       ],
     }),
     updateProduct: builder.mutation({
@@ -62,6 +64,8 @@ export const productsApi = api.injectEndpoints({
         { type: 'Products', id: 'LIST' },
         { type: 'Products', id: 'ADMIN_LIST' },
         { type: 'Products', id: 'FEATURED' },
+        { type: 'Festival', id: 'ACTIVE' },
+        { type: 'Festival', id: 'ADMIN_LIST' },
       ],
     }),
     deleteProduct: builder.mutation({
@@ -73,6 +77,8 @@ export const productsApi = api.injectEndpoints({
         { type: 'Products', id: 'LIST' },
         { type: 'Products', id: 'ADMIN_LIST' },
         { type: 'Products', id: 'FEATURED' },
+        { type: 'Festival', id: 'ACTIVE' },
+        { type: 'Festival', id: 'ADMIN_LIST' },
       ],
     }),
   }),

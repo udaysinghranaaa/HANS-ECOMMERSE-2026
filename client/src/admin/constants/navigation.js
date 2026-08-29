@@ -16,6 +16,16 @@ const navSections = [
         path: '/admin/homepage/banners',
         icon: 'Image',
       },
+      {
+        label: 'Site Images',
+        path: '/admin/homepage/site-images',
+        icon: 'Image',
+      },
+      {
+        label: 'Festival / Sale',
+        path: '/admin/festivals',
+        icon: 'Sparkles',
+      },
     ],
   },
 ];

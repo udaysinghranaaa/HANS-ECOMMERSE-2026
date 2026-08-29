@@ -27,6 +27,8 @@ export const api = createApi({
     'Payments',
     'Admin',
     'HomepageBanner',
+    'Festival',
+    'SiteMedia',
   ],
   endpoints: () => ({}),
 });

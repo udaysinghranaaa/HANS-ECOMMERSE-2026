@@ -130,3 +130,41 @@ export const learnCards = [
     icon: 'FileText',
   },
 ];
+
+export const corporateOffice = {
+  address:
+    '1st Floor, Balaji Complex, Near Purana Roadways Bus Stand, Opposite Dal Mandi, Sheetal Ganj, Bulandshahr - 203001, Uttar Pradesh',
+  mapsQuery:
+    'Balaji Complex, Sheetal Ganj, Bulandshahr 203001, Uttar Pradesh',
+  directionsUrl:
+    'https://www.google.com/maps/dir/?api=1&destination=1st+Floor,+Balaji+Complex,+Near+Purana+Roadways+Bus+Stand,+Opposite+Dal+Mandi,+Sheetal+Ganj,+Bulandshahr+-+203001,+Uttar+Pradesh',
+  embedUrl:
+    'https://www.google.com/maps?q=Balaji+Complex,+Sheetal+Ganj,+Bulandshahr+203001,+Uttar+Pradesh&output=embed',
+};
+
+export const contactInfo = {
+  email: 'hanssolarenergy@gmail.com',
+};
+
+export const aboutUsVideo = {
+  youtubeId: 'A-RxdvNk2cE',
+  url: 'https://youtu.be/A-RxdvNk2cE?si=j7wKNYcN7dcMYfhi',
+  title: 'HANS Solar company overview',
+};
+
+export const aboutUsContent = {
+  title: 'About Us',
+  paragraphs: [
+    'HANS Solar is a trusted solar energy partner delivering premium panels, inverters, batteries and complete system solutions for homes, businesses and industries.',
+    'From our corporate office in Bulandshahr, Uttar Pradesh, we support customers with quality products, subsidy guidance and professional installation assistance. Over 800 families have already benefited from eligible government solar subsidies through HANS Solar installations — helping more households switch to clean, reliable energy every day.',
+  ],
+};
+
+export const installationGalleryImages = Array.from({ length: 11 }, (_, index) => {
+  const localPath = `/s${index + 1}.webp`;
+
+  return {
+    src: localPath,
+    alt: `HANS Solar subsidy installation ${index + 1}`,
+  };
+});

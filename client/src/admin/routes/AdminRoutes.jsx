@@ -10,6 +10,9 @@ import AdminCategoryFormPage from '@/admin/pages/AdminCategoryFormPage';
 import AdminEnquiriesPage from '@/admin/pages/AdminEnquiriesPage';
 import AdminSettingsPage from '@/admin/pages/AdminSettingsPage';
 import AdminBannerManagementPage from '@/admin/pages/AdminBannerManagementPage';
+import AdminFestivalsPage from '@/admin/pages/AdminFestivalsPage';
+import AdminFestivalFormPage from '@/admin/pages/AdminFestivalFormPage';
+import AdminSiteMediaPage from '@/admin/pages/AdminSiteMediaPage';
 
 export default function AdminRoutes() {
   return (
@@ -32,6 +35,10 @@ export default function AdminRoutes() {
             path="homepage/banners"
             element={<AdminBannerManagementPage />}
           />
+          <Route path="festivals" element={<AdminFestivalsPage />} />
+          <Route path="festivals/new" element={<AdminFestivalFormPage />} />
+          <Route path="festivals/:id/edit" element={<AdminFestivalFormPage />} />
+          <Route path="homepage/site-images" element={<AdminSiteMediaPage />} />
         </Route>
       </Route>
     </Routes>

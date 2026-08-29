@@ -1,29 +1,15 @@
 import prisma from '../config/prisma.js';
-import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
-import { buildBannerImageUrl, deleteBannerFile } from '../utils/fileUpload.js';
+import { deleteBannerFile, persistUploadedImage } from '../utils/fileUpload.js';
+import { toAbsoluteMediaUrl } from '../utils/mediaUrl.js';
 
 export const BANNER_POSITIONS = [1, 2, 3, 4];
-
-const toAbsoluteImageUrl = (imageUrl, updatedAt) => {
-  if (!imageUrl) {
-    return imageUrl;
-  }
-
-  const version = new Date(updatedAt).getTime();
-  const baseUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://')
-    ? imageUrl
-    : `${config.serverUrl}${imageUrl}`;
-
-  const separator = baseUrl.includes('?') ? '&' : '?';
-  return `${baseUrl}${separator}v=${version}`;
-};
 
 const formatBanner = (banner) => ({
   id: banner.id,
   position: banner.position,
   title: banner.title,
-  imageUrl: toAbsoluteImageUrl(banner.imageUrl, banner.updatedAt),
+  imageUrl: toAbsoluteMediaUrl(banner.imageUrl, banner.updatedAt, { width: 1920 }),
   isActive: banner.isActive,
   createdAt: banner.createdAt,
   updatedAt: banner.updatedAt,
@@ -56,24 +42,28 @@ export const getAdminHomepageBanners = async () => {
   }));
 };
 
-export const upsertHomepageBanner = async ({ position, title, filename }) => {
+export const upsertHomepageBanner = async ({ position, title, imageFile }) => {
   if (!BANNER_POSITIONS.includes(position)) {
     throw new ApiError(400, 'Banner position must be between 1 and 4');
   }
 
-  const imageUrl = buildBannerImageUrl(filename);
+  const { url: imageUrl, publicId: imagePublicId } = await persistUploadedImage(
+    imageFile,
+    'banners',
+  );
   const existingBanner = await prisma.homepageBanner.findUnique({
     where: { position },
   });
 
   if (existingBanner) {
-    deleteBannerFile(existingBanner.imageUrl);
+    await deleteBannerFile(existingBanner.imageUrl, existingBanner.imagePublicId);
 
     const banner = await prisma.homepageBanner.update({
       where: { position },
       data: {
         title,
         imageUrl,
+        imagePublicId,
         isActive: true,
       },
     });
@@ -86,6 +76,7 @@ export const upsertHomepageBanner = async ({ position, title, filename }) => {
       position,
       title,
       imageUrl,
+      imagePublicId,
       isActive: true,
     },
   });
@@ -134,7 +125,7 @@ export const deleteHomepageBannerByPosition = async (position) => {
   }
 
   await prisma.homepageBanner.delete({ where: { position } });
-  deleteBannerFile(banner.imageUrl);
+  await deleteBannerFile(banner.imageUrl, banner.imagePublicId);
 
   return { message: 'Banner removed successfully' };
 };

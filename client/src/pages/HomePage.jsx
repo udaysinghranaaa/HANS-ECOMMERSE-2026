@@ -1,23 +1,24 @@
 import Hero from '@/components/home/Hero';
-import FeatureSection from '@/components/home/FeatureSection';
+import FestivalSaleSection from '@/components/home/FestivalSaleSection';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import FeaturedProductsSection from '@/components/home/FeaturedProductsSection';
 import ProductShowcase from '@/components/home/ProductShowcase';
-import DistributorCTA from '@/components/home/DistributorCTA';
-import LearnSection from '@/components/home/LearnSection';
-import ContactCTA from '@/components/home/ContactCTA';
+import FeatureSection from '@/components/home/FeatureSection';
+import InstallationGallerySection from '@/components/home/InstallationGallerySection';
+import CorporateOfficeSection from '@/components/home/CorporateOfficeSection';
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <FeaturedProductsSection />
+      <FestivalSaleSection />
+      <WhyChooseUs />
+      <FeaturedProductsSection section="trending" />
+      <FeaturedProductsSection section="subsidy" />
       <ProductShowcase />
       <FeatureSection />
-      <WhyChooseUs />
-      <DistributorCTA />
-      <LearnSection />
-      <ContactCTA />
+      <InstallationGallerySection />
+      <CorporateOfficeSection />
     </>
   );
 }

@@ -1,10 +1,10 @@
 import prisma from '../config/prisma.js';
-import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
 import {
-  buildCategoryImageUrl,
   deleteCategoryImageFile,
+  persistUploadedImage,
 } from '../utils/fileUpload.js';
+import { toAbsoluteMediaUrl } from '../utils/mediaUrl.js';
 
 const DEFAULT_CATEGORIES = [
   {
@@ -40,28 +40,13 @@ const slugify = (value) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-const toAbsoluteImageUrl = (imageUrl, updatedAt) => {
-  if (!imageUrl) {
-    return null;
-  }
-
-  const version = updatedAt ? new Date(updatedAt).getTime() : Date.now();
-  const baseUrl =
-    imageUrl.startsWith('http://') || imageUrl.startsWith('https://')
-      ? imageUrl
-      : `${config.serverUrl}${imageUrl}`;
-
-  const separator = baseUrl.includes('?') ? '&' : '?';
-  return `${baseUrl}${separator}v=${version}`;
-};
-
 const formatCategory = (category, { productCount } = {}) => {
   const formatted = {
     id: category.id,
     name: category.name,
     slug: category.slug,
     description: category.description,
-    image: toAbsoluteImageUrl(category.image, category.updatedAt),
+    image: toAbsoluteMediaUrl(category.image, category.updatedAt, { width: 1200 }),
     isActive: category.isActive,
     createdAt: category.createdAt,
     updatedAt: category.updatedAt,
@@ -178,7 +163,10 @@ export const createCategory = async ({
   }
 
   const slug = await buildUniqueSlug(name.trim());
-  const image = buildCategoryImageUrl(imageFile.filename);
+  const { url: image, publicId: imagePublicId } = await persistUploadedImage(
+    imageFile,
+    'categories',
+  );
 
   const category = await prisma.category.create({
     data: {
@@ -186,6 +174,7 @@ export const createCategory = async ({
       slug,
       description: description.trim(),
       image,
+      imagePublicId,
       isActive,
     },
     include: {
@@ -207,6 +196,7 @@ export const updateCategory = async (
   }
 
   let image = existingCategory.image;
+  let imagePublicId = existingCategory.imagePublicId;
   let slug = existingCategory.slug;
 
   if (name !== undefined && name.trim() !== existingCategory.name) {
@@ -218,15 +208,19 @@ export const updateCategory = async (
   }
 
   if (removeImage && image) {
-    deleteCategoryImageFile(image);
+    await deleteCategoryImageFile(image, imagePublicId);
     image = '';
+    imagePublicId = null;
   }
 
   if (imageFile) {
     if (existingCategory.image) {
-      deleteCategoryImageFile(existingCategory.image);
+      await deleteCategoryImageFile(existingCategory.image, existingCategory.imagePublicId);
     }
-    image = buildCategoryImageUrl(imageFile.filename);
+
+    const uploaded = await persistUploadedImage(imageFile, 'categories');
+    image = uploaded.url;
+    imagePublicId = uploaded.publicId;
   }
 
   if (!image) {
@@ -240,6 +234,7 @@ export const updateCategory = async (
       ...(description !== undefined ? { description: description.trim() } : {}),
       ...(isActive !== undefined ? { isActive } : {}),
       image,
+      imagePublicId,
     },
     include: {
       _count: { select: { products: true } },
@@ -271,7 +266,7 @@ export const deleteCategory = async (id) => {
   await prisma.category.delete({ where: { id } });
 
   if (category.image) {
-    deleteCategoryImageFile(category.image);
+    await deleteCategoryImageFile(category.image, category.imagePublicId);
   }
 
   return { message: 'Category deleted successfully' };

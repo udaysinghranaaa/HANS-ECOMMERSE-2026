@@ -2,10 +2,26 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import { ProductCardBadges } from '@/components/shop/ProductBadges';
-import { formatCurrency } from '@/utils/format';
+import {
+  formatCurrency,
+  getEffectiveProductPricing,
+  getFestivalProductPricing,
+} from '@/utils/format';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, festivalPricing }) {
   const imageUrl = product.images?.[0] || '';
+  const pricing = festivalPricing
+    ? getFestivalProductPricing(product, festivalPricing.discountPercent)
+    : getEffectiveProductPricing(product);
+  const hasDiscount = pricing.discountPercent > 0;
+  const resolvedFestivalPricing =
+    festivalPricing ||
+    (product.activeFestivalDiscount
+      ? {
+          discountPercent: product.activeFestivalDiscount,
+          festivalName: product.activeFestival?.name,
+        }
+      : null);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -25,7 +41,10 @@ export default function ProductCard({ product }) {
             No image
           </div>
         )}
-        <ProductCardBadges product={product} />
+        <ProductCardBadges
+          product={product}
+          festivalPricing={resolvedFestivalPricing}
+        />
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
@@ -42,12 +61,19 @@ export default function ProductCard({ product }) {
         </h3>
 
         <div className="mt-3 flex flex-wrap items-end gap-2">
-          <span className="text-sm text-gray-400 line-through">
-            {formatCurrency(product.originalPrice ?? product.price)}
-          </span>
           <span className="text-xl font-bold text-solar-700">
-            {formatCurrency(product.discountedPrice)}
+            {formatCurrency(pricing.salePrice)}
           </span>
+          {hasDiscount && (
+            <>
+              <span className="text-sm text-gray-400 line-through">
+                {formatCurrency(pricing.originalPrice)}
+              </span>
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                {pricing.discountPercent}% OFF
+              </span>
+            </>
+          )}
         </div>
 
         <Button

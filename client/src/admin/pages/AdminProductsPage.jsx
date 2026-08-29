@@ -91,9 +91,6 @@ export default function AdminProductsPage() {
                     Price
                   </th>
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Discount
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Stock
                   </th>
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -130,9 +127,6 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-600">
                       {formatCurrency(product.price)}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-slate-600">
-                      {product.discountPercent ?? 18}% OFF
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-600">
                       {product.stock}

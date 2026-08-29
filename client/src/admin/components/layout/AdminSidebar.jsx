@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Package,
   Settings,
+  Sparkles,
   Sun,
   X,
 } from 'lucide-react';
@@ -19,6 +20,7 @@ const iconMap = {
   MessageSquare,
   Settings,
   Image,
+  Sparkles,
 };
 
 export default function AdminSidebar({ isOpen, onClose, onLogout }) {

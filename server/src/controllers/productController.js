@@ -1,5 +1,6 @@
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
+import { normalizeStoredMediaUrl } from '../utils/mediaUrl.js';
 import {
   createProduct,
   deleteProduct,
@@ -36,7 +37,6 @@ const mapProductBody = (body, files) => {
     name: body.name,
     description: body.description,
     price: body.price,
-    discountPercent: body.discountPercent ?? 18,
     categoryId: body.categoryId,
     stock: body.stock ?? 0,
     specifications: body.specifications,
@@ -63,7 +63,18 @@ const mapProductBody = (body, files) => {
       body.saleDiscountPercent === ''
         ? undefined
         : body.saleDiscountPercent,
-    existingImages: parseExistingImages(body.existingImages),
+    festivalId:
+      body.festivalId === undefined || body.festivalId === ''
+        ? undefined
+        : body.festivalId,
+    festivalDiscountPercent:
+      body.festivalDiscountPercent === undefined ||
+      body.festivalDiscountPercent === ''
+        ? undefined
+        : body.festivalDiscountPercent,
+    existingImages: parseExistingImages(body.existingImages).map(
+      normalizeStoredMediaUrl,
+    ),
     imageFiles,
     videoFile,
     removeVideo: body.removeVideo === true || body.removeVideo === 'true',

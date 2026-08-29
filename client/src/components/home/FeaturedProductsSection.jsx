@@ -122,7 +122,7 @@ function FeaturedProductBlock({
   );
 }
 
-export default function FeaturedProductsSection() {
+export default function FeaturedProductsSection({ section = 'all' }) {
   const { data, isLoading } = useGetFeaturedProductsQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
@@ -147,30 +147,43 @@ export default function FeaturedProductsSection() {
     return null;
   }
 
-  if (trendingProducts.length === 0 && subsidyProducts.length === 0) {
+  const showTrending = section === 'all' || section === 'trending';
+  const showSubsidy = section === 'all' || section === 'subsidy';
+
+  if (
+    (showTrending && trendingProducts.length === 0 && !showSubsidy) ||
+    (showSubsidy && subsidyProducts.length === 0 && !showTrending) ||
+    (section === 'all' &&
+      trendingProducts.length === 0 &&
+      subsidyProducts.length === 0)
+  ) {
     return null;
   }
 
   return (
     <>
-      <FeaturedProductBlock
-        sectionKey="trending"
-        eyebrow="Trending Now"
-        title="Trending & Best Sellers"
-        subtitle="Our most popular solar products, loved by customers."
-        products={trendingProducts}
-        icon={Sparkles}
-        background="gray"
-      />
-      <FeaturedProductBlock
-        sectionKey="subsidy"
-        eyebrow="Subsidy Eligible"
-        title="Top Government Subsidy Picks"
-        subtitle="Popular subsidy-eligible solar solutions to help you save more on clean energy."
-        products={subsidyProducts}
-        icon={Landmark}
-        background="white"
-      />
+      {showTrending && trendingProducts.length > 0 && (
+        <FeaturedProductBlock
+          sectionKey="trending"
+          eyebrow="Trending Now"
+          title="Trending Products"
+          subtitle="Our most popular solar products, loved by customers."
+          products={trendingProducts}
+          icon={Sparkles}
+          background="gray"
+        />
+      )}
+      {showSubsidy && subsidyProducts.length > 0 && (
+        <FeaturedProductBlock
+          sectionKey="subsidy"
+          eyebrow="Subsidy Eligible"
+          title="Top Government Subsidy Products"
+          subtitle="Popular subsidy-eligible solar solutions to help you save more on clean energy."
+          products={subsidyProducts}
+          icon={Landmark}
+          background="white"
+        />
+      )}
     </>
   );
 }

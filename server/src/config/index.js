@@ -1,6 +1,12 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+const stripEnv = (value) => value?.trim().replace(/^["']|["']$/g, '') ?? '';
 
 const config = {
   env: process.env.NODE_ENV || 'development',
@@ -16,6 +22,12 @@ const config = {
     email: process.env.ADMIN_EMAIL?.trim().toLowerCase(),
     password: process.env.ADMIN_PASSWORD,
     name: process.env.ADMIN_NAME?.trim() || 'HANS Solar Admin',
+  },
+  cloudinary: {
+    cloudName: stripEnv(process.env.CLOUDINARY_CLOUD_NAME),
+    apiKey: stripEnv(process.env.CLOUDINARY_API_KEY),
+    apiSecret: stripEnv(process.env.CLOUDINARY_API_SECRET),
+    folder: stripEnv(process.env.CLOUDINARY_FOLDER) || 'hans-solar',
   },
 };
 

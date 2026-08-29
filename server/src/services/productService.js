@@ -1,29 +1,28 @@
 import prisma from '../config/prisma.js';
-import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
 import {
-  buildProductImageUrl,
-  buildProductVideoUrl,
+  deleteProductImageFile,
   deleteProductMedia,
+  persistUploadedImage,
+  persistUploadedVideo,
 } from '../utils/fileUpload.js';
+import {
+  applyActiveFestivalFields,
+  findActiveFestival,
+} from './festivalPricingService.js';
+import { toAbsoluteMediaUrl, normalizeStoredMediaUrl } from '../utils/mediaUrl.js';
 
-const toAbsoluteMediaUrl = (mediaUrl, updatedAt) => {
-  if (!mediaUrl) {
-    return null;
-  }
+const findPublicIdForUrl = (url, images, publicIds = []) => {
+  const normalized = normalizeStoredMediaUrl(url);
+  const index = images.findIndex(
+    (image) => normalizeStoredMediaUrl(image) === normalized,
+  );
 
-  const version = updatedAt ? new Date(updatedAt).getTime() : Date.now();
-  const baseUrl =
-    mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://')
-      ? mediaUrl
-      : `${config.serverUrl}${mediaUrl}`;
-
-  const separator = baseUrl.includes('?') ? '&' : '?';
-  return `${baseUrl}${separator}v=${version}`;
+  return index >= 0 ? publicIds[index] ?? null : null;
 };
 
-const calculateDiscountedPrice = (price, discountPercent) =>
-  Math.round(price * (1 - discountPercent / 100));
+const toAbsoluteMediaUrlForProduct = (mediaUrl, updatedAt) =>
+  toAbsoluteMediaUrl(mediaUrl, updatedAt, { width: 1200 });
 
 const normalizeSaleFields = (isOnSale, saleDiscountPercent) => {
   if (!isOnSale) {
@@ -55,24 +54,39 @@ const parseSpecifications = (value) => {
   }
 };
 
-const formatProduct = (product, { includeCategory = true } = {}) => {
-  const discountedPrice = calculateDiscountedPrice(
-    product.price,
-    product.discountPercent,
-  );
+const normalizeFestivalFields = async (festivalId, festivalDiscountPercent) => {
+  if (!festivalId || festivalId === 'none' || festivalId === '') {
+    return { festivalId: null, festivalDiscountPercent: null };
+  }
 
+  const festival = await prisma.festival.findUnique({ where: { id: festivalId } });
+
+  if (!festival) {
+    throw new ApiError(400, 'Selected festival does not exist');
+  }
+
+  const percent = Number(festivalDiscountPercent);
+
+  if (!Number.isFinite(percent) || percent <= 0 || percent >= 100) {
+    throw new ApiError(
+      400,
+      'Festival discount must be between 1 and 99 percent when a festival is selected',
+    );
+  }
+
+  return { festivalId, festivalDiscountPercent: percent };
+};
+
+const formatProduct = (product, { includeCategory = true } = {}) => {
   const formatted = {
     id: product.id,
     name: product.name,
     description: product.description,
     price: product.price,
-    originalPrice: product.price,
-    discountPercent: product.discountPercent,
-    discountedPrice,
     images: (product.images || []).map((image) =>
-      toAbsoluteMediaUrl(image, product.updatedAt),
+      toAbsoluteMediaUrlForProduct(image, product.updatedAt),
     ),
-    videoUrl: toAbsoluteMediaUrl(product.videoUrl, product.updatedAt),
+    videoUrl: toAbsoluteMediaUrlForProduct(product.videoUrl, product.updatedAt),
     categoryId: product.categoryId,
     stock: product.stock,
     specifications: product.specifications || {},
@@ -82,6 +96,8 @@ const formatProduct = (product, { includeCategory = true } = {}) => {
     isGovernmentSubsidy: product.isGovernmentSubsidy,
     isOnSale: product.isOnSale ?? false,
     saleDiscountPercent: product.saleDiscountPercent ?? null,
+    festivalId: product.festivalId ?? null,
+    festivalDiscountPercent: product.festivalDiscountPercent ?? null,
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   };
@@ -94,14 +110,36 @@ const formatProduct = (product, { includeCategory = true } = {}) => {
     };
   }
 
+  if (product.festival) {
+    formatted.festival = {
+      id: product.festival.id,
+      name: product.festival.name,
+    };
+  }
+
   return formatted;
 };
 
-const productInclude = {
+const formatPublicProduct = (product, activeFestival) => {
+  const formatted = formatProduct(product);
+  return activeFestival
+    ? applyActiveFestivalFields(formatted, product, activeFestival)
+    : formatted;
+};
+
+const formatPublicProducts = (products, activeFestival) =>
+  products.map((product) => formatPublicProduct(product, activeFestival));
+
+export const productInclude = {
   category: {
     select: { id: true, name: true, slug: true },
   },
+  festival: {
+    select: { id: true, name: true },
+  },
 };
+
+export { formatProduct };
 
 export const getPublicProducts = async ({ categorySlug } = {}) => {
   const where = { isActive: true };
@@ -116,11 +154,13 @@ export const getPublicProducts = async ({ categorySlug } = {}) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  return products.map((product) => formatProduct(product));
+  const activeFestival = await findActiveFestival();
+  return formatPublicProducts(products, activeFestival);
 };
 
 export const getFeaturedProducts = async () => {
   const baseWhere = { isActive: true };
+  const activeFestival = await findActiveFestival();
 
   const [trendingProducts, subsidyProducts] = await Promise.all([
     prisma.product.findMany({
@@ -136,8 +176,8 @@ export const getFeaturedProducts = async () => {
   ]);
 
   return {
-    trendingProducts: trendingProducts.map((product) => formatProduct(product)),
-    subsidyProducts: subsidyProducts.map((product) => formatProduct(product)),
+    trendingProducts: formatPublicProducts(trendingProducts, activeFestival),
+    subsidyProducts: formatPublicProducts(subsidyProducts, activeFestival),
   };
 };
 
@@ -162,9 +202,11 @@ export const getPublicProductById = async (id) => {
     take: 4,
   });
 
+  const activeFestival = await findActiveFestival();
+
   return {
-    product: formatProduct(product),
-    relatedProducts: relatedProducts.map((item) => formatProduct(item)),
+    product: formatPublicProduct(product, activeFestival),
+    relatedProducts: formatPublicProducts(relatedProducts, activeFestival),
   };
 };
 
@@ -194,7 +236,6 @@ export const createProduct = async ({
   name,
   description,
   price,
-  discountPercent = 18,
   categoryId,
   stock = 0,
   specifications,
@@ -204,6 +245,8 @@ export const createProduct = async ({
   isGovernmentSubsidy = false,
   isOnSale = false,
   saleDiscountPercent = null,
+  festivalId = null,
+  festivalDiscountPercent = null,
   imageFiles = [],
   videoFile = null,
 }) => {
@@ -236,18 +279,30 @@ export const createProduct = async ({
     throw new ApiError(400, 'Selected category does not exist');
   }
 
-  const images = imageFiles.map((file) => buildProductImageUrl(file.filename));
-  const videoUrl = videoFile ? buildProductVideoUrl(videoFile.filename) : null;
+  const uploadedImages = await Promise.all(
+    imageFiles.map((file) => persistUploadedImage(file, 'products/images')),
+  );
+  const images = uploadedImages.map((upload) => upload.url);
+  const imagePublicIds = uploadedImages.map((upload) => upload.publicId);
+  const uploadedVideo = videoFile ? await persistUploadedVideo(videoFile) : null;
+  const videoUrl = uploadedVideo?.url ?? null;
+  const videoPublicId = uploadedVideo?.publicId ?? null;
   const saleFields = normalizeSaleFields(isOnSale, saleDiscountPercent);
+  const festivalFields = await normalizeFestivalFields(
+    festivalId,
+    festivalDiscountPercent,
+  );
 
   const product = await prisma.product.create({
     data: {
       name: name.trim(),
       description: description.trim(),
       price: Number(price),
-      discountPercent: Number(discountPercent) || 18,
+      discountPercent: 0,
       images,
+      imagePublicIds,
       videoUrl,
+      videoPublicId,
       categoryId,
       stock: Number(stock) || 0,
       specifications: parseSpecifications(specifications),
@@ -256,6 +311,7 @@ export const createProduct = async ({
       isTrending,
       isGovernmentSubsidy,
       ...saleFields,
+      ...festivalFields,
     },
     include: productInclude,
   });
@@ -269,7 +325,6 @@ export const updateProduct = async (
     name,
     description,
     price,
-    discountPercent,
     categoryId,
     stock,
     specifications,
@@ -279,6 +334,8 @@ export const updateProduct = async (
     isGovernmentSubsidy,
     isOnSale,
     saleDiscountPercent,
+    festivalId,
+    festivalDiscountPercent,
     existingImages = [],
     imageFiles = [],
     videoFile = null,
@@ -291,7 +348,24 @@ export const updateProduct = async (
     throw new ApiError(404, 'Product not found');
   }
 
-  const mergedImages = [...existingImages, ...imageFiles.map((file) => buildProductImageUrl(file.filename))];
+  const normalizedExistingImages = existingImages.map(normalizeStoredMediaUrl);
+  const uploadedImages = await Promise.all(
+    imageFiles.map((file) => persistUploadedImage(file, 'products/images')),
+  );
+  const mergedImages = [
+    ...normalizedExistingImages,
+    ...uploadedImages.map((upload) => upload.url),
+  ];
+  const mergedPublicIds = [
+    ...normalizedExistingImages.map((url) =>
+      findPublicIdForUrl(
+        url,
+        existingProduct.images,
+        existingProduct.imagePublicIds ?? [],
+      ),
+    ),
+    ...uploadedImages.map((upload) => upload.publicId),
+  ];
 
   if (mergedImages.length === 0) {
     throw new ApiError(400, 'At least one product image is required');
@@ -302,22 +376,44 @@ export const updateProduct = async (
   }
 
   const removedImages = existingProduct.images.filter(
-    (image) => !mergedImages.includes(image),
+    (image) => !mergedImages.includes(normalizeStoredMediaUrl(image)),
   );
-  removedImages.forEach((image) => deleteProductMedia({ images: [image] }));
+  await Promise.all(
+    removedImages.map((image) =>
+      deleteProductImageFile(
+        image,
+        findPublicIdForUrl(
+          image,
+          existingProduct.images,
+          existingProduct.imagePublicIds ?? [],
+        ),
+      ),
+    ),
+  );
 
   let videoUrl = existingProduct.videoUrl;
+  let videoPublicId = existingProduct.videoPublicId;
 
   if (removeVideo && videoUrl) {
-    deleteProductMedia({ videoUrl });
+    await deleteProductMedia({
+      videoUrl,
+      videoPublicId,
+    });
     videoUrl = null;
+    videoPublicId = null;
   }
 
   if (videoFile) {
     if (existingProduct.videoUrl) {
-      deleteProductMedia({ videoUrl: existingProduct.videoUrl });
+      await deleteProductMedia({
+        videoUrl: existingProduct.videoUrl,
+        videoPublicId: existingProduct.videoPublicId,
+      });
     }
-    videoUrl = buildProductVideoUrl(videoFile.filename);
+
+    const uploadedVideo = await persistUploadedVideo(videoFile);
+    videoUrl = uploadedVideo.url;
+    videoPublicId = uploadedVideo.publicId;
   }
 
   if (categoryId) {
@@ -335,15 +431,21 @@ export const updateProduct = async (
         )
       : {};
 
+  const festivalUpdate =
+    festivalId !== undefined || festivalDiscountPercent !== undefined
+      ? await normalizeFestivalFields(
+          festivalId ?? existingProduct.festivalId,
+          festivalDiscountPercent ?? existingProduct.festivalDiscountPercent,
+        )
+      : {};
+
   const product = await prisma.product.update({
     where: { id },
     data: {
       ...(name !== undefined ? { name: name.trim() } : {}),
       ...(description !== undefined ? { description: description.trim() } : {}),
       ...(price !== undefined ? { price: Number(price) } : {}),
-      ...(discountPercent !== undefined
-        ? { discountPercent: Number(discountPercent) }
-        : {}),
+      discountPercent: 0,
       ...(categoryId !== undefined ? { categoryId } : {}),
       ...(stock !== undefined ? { stock: Number(stock) } : {}),
       ...(specifications !== undefined
@@ -354,8 +456,11 @@ export const updateProduct = async (
       ...(isTrending !== undefined ? { isTrending } : {}),
       ...(isGovernmentSubsidy !== undefined ? { isGovernmentSubsidy } : {}),
       ...saleUpdate,
+      ...festivalUpdate,
       images: mergedImages,
+      imagePublicIds: mergedPublicIds,
       videoUrl,
+      videoPublicId,
     },
     include: productInclude,
   });
@@ -371,7 +476,12 @@ export const deleteProduct = async (id) => {
   }
 
   await prisma.product.delete({ where: { id } });
-  deleteProductMedia({ images: product.images, videoUrl: product.videoUrl });
+  await deleteProductMedia({
+    images: product.images,
+    imagePublicIds: product.imagePublicIds ?? [],
+    videoUrl: product.videoUrl,
+    videoPublicId: product.videoPublicId,
+  });
 
   return { message: 'Product deleted successfully' };
 };

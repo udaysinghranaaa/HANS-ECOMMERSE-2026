@@ -11,7 +11,7 @@ import Button from '@/components/ui/Button';
 import ProductCard from '@/components/shop/ProductCard';
 import { ProductDetailBadges } from '@/components/shop/ProductBadges';
 import { useGetPublicProductByIdQuery } from '@/services/productsApi';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency, getAmountSaved, getEffectiveProductPricing } from '@/utils/format';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -48,6 +48,8 @@ export default function ProductDetailPage() {
   }
 
   const activeImage = images[activeImageIndex] || images[0];
+  const pricing = getEffectiveProductPricing(product);
+  const amountSaved = getAmountSaved(pricing);
 
   return (
     <div className="bg-gray-50">
@@ -148,12 +150,24 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-end gap-3">
-              <span className="text-lg text-gray-400 line-through">
-                {formatCurrency(product.originalPrice ?? product.price)}
-              </span>
               <span className="text-3xl font-bold text-solar-700">
-                {formatCurrency(product.discountedPrice)}
+                {formatCurrency(pricing.salePrice)}
               </span>
+              {pricing.discountPercent > 0 && (
+                <>
+                  <span className="text-lg text-gray-400 line-through">
+                    {formatCurrency(pricing.originalPrice)}
+                  </span>
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-sm font-semibold text-amber-700">
+                    {pricing.discountPercent}% OFF
+                  </span>
+                  {amountSaved > 0 && (
+                    <span className="text-sm font-medium text-emerald-600">
+                      Save {formatCurrency(amountSaved)}
+                    </span>
+                  )}
+                </>
+              )}
             </div>
 
             <p className="mt-6 text-base leading-relaxed text-charcoal-light">

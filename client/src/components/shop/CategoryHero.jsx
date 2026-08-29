@@ -17,7 +17,7 @@ export default function CategoryHero({ category }) {
           </h1>
           <p className="mt-3 max-w-2xl text-base text-charcoal-light sm:text-lg">
             Browse our complete range of solar panels, inverters, batteries and
-            accessories with exclusive online discounts.
+            accessories.
           </p>
         </div>
       </section>

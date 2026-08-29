@@ -4,6 +4,7 @@ import { ChevronDown, Layers, Menu, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { navDropdowns, navLinks } from '@/constants/homeContent';
 import { useGetPublicCategoriesQuery } from '@/services/categoriesApi';
+import { useGetSiteMediaQuery } from '@/services/siteMediaApi';
 
 function NavDropdown({ label, items, mobile = false, onNavigate }) {
   const [open, setOpen] = useState(false);
@@ -236,6 +237,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const { data: siteMediaResponse } = useGetSiteMediaQuery();
+  const logoSrc = siteMediaResponse?.data?.logo ?? '/logo.jpg';
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -265,7 +268,7 @@ export default function Navbar() {
         <Link to="/" className="flex shrink-0 items-center">
           {!logoError ? (
             <img
-              src="/logo.jpg"
+                  src={logoSrc}
               alt="HANS Solar"
               className="h-11 w-auto max-w-[150px] object-contain object-left"
               onError={() => setLogoError(true)}

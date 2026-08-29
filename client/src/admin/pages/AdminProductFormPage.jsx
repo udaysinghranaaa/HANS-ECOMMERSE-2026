@@ -46,7 +46,6 @@ export default function AdminProductFormPage() {
     name: '',
     description: '',
     price: '',
-    discountPercent: '18',
     categoryId: '',
     stock: '0',
     warranty: '',
@@ -81,7 +80,6 @@ export default function AdminProductFormPage() {
       name: product.name,
       description: product.description,
       price: String(product.price),
-      discountPercent: String(product.discountPercent ?? 18),
       categoryId: product.categoryId,
       stock: String(product.stock ?? 0),
       warranty: product.warranty,
@@ -276,7 +274,6 @@ export default function AdminProductFormPage() {
     formData.append('name', form.name.trim());
     formData.append('description', form.description.trim());
     formData.append('price', form.price);
-    formData.append('discountPercent', form.discountPercent);
     formData.append('categoryId', form.categoryId);
     formData.append('stock', form.stock);
     formData.append('warranty', form.warranty.trim());
@@ -424,18 +421,6 @@ export default function AdminProductFormPage() {
             {errors.price && (
               <p className="mt-1 text-xs text-red-600">{errors.price}</p>
             )}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Discount
-            </label>
-            <input
-              type="text"
-              value={`${form.discountPercent}% OFF`}
-              readOnly
-              className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
-            />
           </div>
 
           <div>

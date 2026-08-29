@@ -47,7 +47,7 @@ export const upsertAdminHomepageBanner = catchAsync(async (req, res) => {
   const banner = await upsertHomepageBanner({
     position,
     title,
-    filename: req.file.filename,
+    imageFile: req.file,
   });
 
   res.status(200).json({
