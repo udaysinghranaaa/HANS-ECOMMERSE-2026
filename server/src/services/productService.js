@@ -6,11 +6,16 @@ import {
   persistUploadedImage,
   persistUploadedVideo,
 } from '../utils/fileUpload.js';
+import { toAbsoluteMediaUrl, normalizeStoredMediaUrl } from '../utils/mediaUrl.js';
+import {
+  isUploadedVideoUrl,
+  isYouTubeVideoUrl,
+  normalizeYouTubeVideoInput,
+} from '../utils/videoUrl.js';
 import {
   applyActiveFestivalFields,
   findActiveFestival,
 } from './festivalPricingService.js';
-import { toAbsoluteMediaUrl, normalizeStoredMediaUrl } from '../utils/mediaUrl.js';
 
 const findPublicIdForUrl = (url, images, publicIds = []) => {
   const normalized = normalizeStoredMediaUrl(url);
@@ -23,6 +28,18 @@ const findPublicIdForUrl = (url, images, publicIds = []) => {
 
 const toAbsoluteMediaUrlForProduct = (mediaUrl, updatedAt) =>
   toAbsoluteMediaUrl(mediaUrl, updatedAt, { width: 1200 });
+
+const formatProductVideoUrl = (videoUrl, updatedAt) => {
+  if (!videoUrl) {
+    return null;
+  }
+
+  if (isYouTubeVideoUrl(videoUrl)) {
+    return videoUrl;
+  }
+
+  return toAbsoluteMediaUrlForProduct(videoUrl, updatedAt);
+};
 
 const normalizeSaleFields = (isOnSale, saleDiscountPercent) => {
   if (!isOnSale) {
@@ -77,6 +94,75 @@ const normalizeFestivalFields = async (festivalId, festivalDiscountPercent) => {
   return { festivalId, festivalDiscountPercent: percent };
 };
 
+const resolveProductVideoFields = async ({
+  existingVideoUrl = null,
+  existingVideoPublicId = null,
+  videoFile = null,
+  videoLink = null,
+  removeVideo = false,
+}) => {
+  if (removeVideo) {
+    if (existingVideoUrl && isUploadedVideoUrl(existingVideoUrl)) {
+      await deleteProductMedia({
+        videoUrl: existingVideoUrl,
+        videoPublicId: existingVideoPublicId,
+      });
+    }
+
+    return { videoUrl: null, videoPublicId: null };
+  }
+
+  if (videoFile) {
+    if (existingVideoUrl && isUploadedVideoUrl(existingVideoUrl)) {
+      await deleteProductMedia({
+        videoUrl: existingVideoUrl,
+        videoPublicId: existingVideoPublicId,
+      });
+    }
+
+    const uploadedVideo = await persistUploadedVideo(videoFile);
+    return {
+      videoUrl: uploadedVideo.url,
+      videoPublicId: uploadedVideo.publicId,
+    };
+  }
+
+  if (videoLink !== undefined && videoLink !== null) {
+    const trimmedLink = String(videoLink).trim();
+
+    if (!trimmedLink) {
+      if (existingVideoUrl && isUploadedVideoUrl(existingVideoUrl)) {
+        await deleteProductMedia({
+          videoUrl: existingVideoUrl,
+          videoPublicId: existingVideoPublicId,
+        });
+      }
+
+      return { videoUrl: null, videoPublicId: null };
+    }
+
+    const normalizedYouTube = normalizeYouTubeVideoInput(trimmedLink);
+
+    if (!normalizedYouTube) {
+      throw new ApiError(400, 'Enter a valid YouTube video link');
+    }
+
+    if (existingVideoUrl && isUploadedVideoUrl(existingVideoUrl)) {
+      await deleteProductMedia({
+        videoUrl: existingVideoUrl,
+        videoPublicId: existingVideoPublicId,
+      });
+    }
+
+    return { videoUrl: normalizedYouTube, videoPublicId: null };
+  }
+
+  return {
+    videoUrl: existingVideoUrl,
+    videoPublicId: existingVideoPublicId,
+  };
+};
+
 const formatProduct = (product, { includeCategory = true } = {}) => {
   const formatted = {
     id: product.id,
@@ -86,7 +172,7 @@ const formatProduct = (product, { includeCategory = true } = {}) => {
     images: (product.images || []).map((image) =>
       toAbsoluteMediaUrlForProduct(image, product.updatedAt),
     ),
-    videoUrl: toAbsoluteMediaUrlForProduct(product.videoUrl, product.updatedAt),
+    videoUrl: formatProductVideoUrl(product.videoUrl, product.updatedAt),
     categoryId: product.categoryId,
     stock: product.stock,
     specifications: product.specifications || {},
@@ -249,6 +335,7 @@ export const createProduct = async ({
   festivalDiscountPercent = null,
   imageFiles = [],
   videoFile = null,
+  videoLink = null,
 }) => {
   if (!name?.trim()) {
     throw new ApiError(400, 'Product title is required');
@@ -284,9 +371,10 @@ export const createProduct = async ({
   );
   const images = uploadedImages.map((upload) => upload.url);
   const imagePublicIds = uploadedImages.map((upload) => upload.publicId);
-  const uploadedVideo = videoFile ? await persistUploadedVideo(videoFile) : null;
-  const videoUrl = uploadedVideo?.url ?? null;
-  const videoPublicId = uploadedVideo?.publicId ?? null;
+  const videoFields = await resolveProductVideoFields({
+    videoFile,
+    videoLink,
+  });
   const saleFields = normalizeSaleFields(isOnSale, saleDiscountPercent);
   const festivalFields = await normalizeFestivalFields(
     festivalId,
@@ -301,8 +389,8 @@ export const createProduct = async ({
       discountPercent: 0,
       images,
       imagePublicIds,
-      videoUrl,
-      videoPublicId,
+      videoUrl: videoFields.videoUrl,
+      videoPublicId: videoFields.videoPublicId,
       categoryId,
       stock: Number(stock) || 0,
       specifications: parseSpecifications(specifications),
@@ -339,6 +427,7 @@ export const updateProduct = async (
     existingImages = [],
     imageFiles = [],
     videoFile = null,
+    videoLink,
     removeVideo = false,
   },
 ) => {
@@ -394,27 +483,15 @@ export const updateProduct = async (
   let videoUrl = existingProduct.videoUrl;
   let videoPublicId = existingProduct.videoPublicId;
 
-  if (removeVideo && videoUrl) {
-    await deleteProductMedia({
-      videoUrl,
-      videoPublicId,
-    });
-    videoUrl = null;
-    videoPublicId = null;
-  }
-
-  if (videoFile) {
-    if (existingProduct.videoUrl) {
-      await deleteProductMedia({
-        videoUrl: existingProduct.videoUrl,
-        videoPublicId: existingProduct.videoPublicId,
-      });
-    }
-
-    const uploadedVideo = await persistUploadedVideo(videoFile);
-    videoUrl = uploadedVideo.url;
-    videoPublicId = uploadedVideo.publicId;
-  }
+  const resolvedVideo = await resolveProductVideoFields({
+    existingVideoUrl: existingProduct.videoUrl,
+    existingVideoPublicId: existingProduct.videoPublicId,
+    videoFile,
+    videoLink,
+    removeVideo,
+  });
+  videoUrl = resolvedVideo.videoUrl;
+  videoPublicId = resolvedVideo.videoPublicId;
 
   if (categoryId) {
     const category = await prisma.category.findUnique({ where: { id: categoryId } });

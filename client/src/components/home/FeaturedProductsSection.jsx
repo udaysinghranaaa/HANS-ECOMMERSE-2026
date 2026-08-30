@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Landmark, Sparkles } from 'lucide-react';
+import { Landmark, Sparkles } from 'lucide-react';
 import ProductCard from '@/components/shop/ProductCard';
+import {
+  CarouselFadeEdges,
+  CarouselNavButton,
+} from '@/components/home/CarouselControls';
+import SectionHeader from '@/components/home/SectionHeader';
 import useRevealOnScroll from '@/hooks/useRevealOnScroll';
 import { useGetFeaturedProductsQuery } from '@/services/productsApi';
 
-function ProductCarousel({ products, isVisible, sectionKey }) {
+function ProductCarousel({ products, isVisible, sectionKey, fadeFrom }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -37,27 +42,23 @@ function ProductCarousel({ products, isVisible, sectionKey }) {
   const showControls = products.length > 1;
 
   return (
-    <div className="relative mt-8">
+    <div className="relative mt-10">
+      <CarouselFadeEdges from={fadeFrom} />
+
       {showControls && canScrollLeft && (
-        <button
-          type="button"
-          aria-label="Scroll products left"
+        <CarouselNavButton
+          direction="left"
+          label="Scroll products left"
           onClick={() => scrollByAmount(-1)}
-          className="absolute -left-2 top-[42%] z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-charcoal shadow-lg transition-all duration-300 hover:scale-105 hover:bg-solar-50 hover:text-solar-700 sm:flex"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
+        />
       )}
 
       {showControls && canScrollRight && (
-        <button
-          type="button"
-          aria-label="Scroll products right"
+        <CarouselNavButton
+          direction="right"
+          label="Scroll products right"
           onClick={() => scrollByAmount(1)}
-          className="absolute -right-2 top-[42%] z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-charcoal shadow-lg transition-all duration-300 hover:scale-105 hover:bg-solar-50 hover:text-solar-700 sm:flex"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
+        />
       )}
 
       <div
@@ -85,7 +86,7 @@ function FeaturedProductBlock({
   title,
   subtitle,
   products,
-  icon: Icon,
+  icon,
   background = 'gray',
 }) {
   const { ref: sectionRef, isVisible } = useRevealOnScroll();
@@ -94,28 +95,29 @@ function FeaturedProductBlock({
     return null;
   }
 
-  const bgClass = background === 'white' ? 'bg-white' : 'bg-gray-50';
+  const isGray = background === 'gray';
+  const sectionClass = isGray
+    ? 'border-y border-slate-100 bg-slate-50/70'
+    : 'bg-white';
+  const fadeFrom = isGray ? 'from-slate-50' : 'from-white';
 
   return (
-    <section ref={sectionRef} className={`${bgClass} py-12 sm:py-14`}>
+    <section ref={sectionRef} className={`${sectionClass} py-16 sm:py-20`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className={`reveal-up max-w-3xl ${isVisible ? 'is-visible' : ''}`}>
-          <p className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-solar-600">
-            <Icon className="h-4 w-4" />
-            {eyebrow}
-          </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-charcoal sm:text-3xl lg:text-4xl">
-            {title}
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-charcoal-light sm:text-base">
-            {subtitle}
-          </p>
+        <div className={`reveal-up ${isVisible ? 'is-visible' : ''}`}>
+          <SectionHeader
+            eyebrow={eyebrow}
+            title={title}
+            subtitle={subtitle}
+            icon={icon}
+          />
         </div>
 
         <ProductCarousel
           sectionKey={sectionKey}
           products={products}
           isVisible={isVisible}
+          fadeFrom={fadeFrom}
         />
       </div>
     </section>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import CategoryCard from '@/components/shop/CategoryCard';
+import SectionHeader from '@/components/home/SectionHeader';
 import useRevealOnScroll from '@/hooks/useRevealOnScroll';
 import { useGetPublicCategoriesQuery } from '@/services/categoriesApi';
 
@@ -62,24 +63,23 @@ export default function ProductShowcase() {
   } = useCarousel(categories.length);
 
   return (
-    <section ref={sectionRef} className="bg-gray-50 py-16 sm:py-20">
+    <section ref={sectionRef} className="bg-white py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           className={`reveal-up flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between ${sectionVisible ? 'is-visible' : ''}`}
         >
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-solar-600">
-              Shop by Category
-            </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-charcoal sm:text-4xl">
-              Explore Our Solar Categories
-            </h2>
-            <p className="mt-4 text-base text-charcoal-light sm:text-lg">
-              Discover curated collections for panels, inverters, batteries and
-              more — built for modern solar projects.
-            </p>
-          </div>
-          <Button to="/shop" variant="secondary" size="sm" className="shrink-0">
+          <SectionHeader
+            eyebrow="Shop by Category"
+            title="Explore Our Solar Categories"
+            subtitle="Discover curated collections for panels, inverters, batteries and more — built for modern solar projects."
+            showAccent
+          />
+          <Button
+            to="/shop"
+            variant="secondary"
+            size="sm"
+            className="shrink-0 rounded-xl border-slate-200"
+          >
             View All Categories
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -94,8 +94,8 @@ export default function ProductShowcase() {
             Unable to load categories right now.
           </div>
         ) : categories.length === 0 ? (
-          <div className="mt-12 rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-            <p className="text-sm text-charcoal-light">
+          <div className="mt-12 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-10 text-center">
+            <p className="text-sm text-slate-600">
               Categories added from the admin dashboard will appear here
               automatically.
             </p>
@@ -109,15 +109,15 @@ export default function ProductShowcase() {
           </div>
         ) : useCarouselLayout ? (
           <div className="relative mt-10">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-12 bg-gradient-to-r from-gray-50 to-transparent sm:block" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-12 bg-gradient-to-l from-gray-50 to-transparent sm:block" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-14 bg-gradient-to-r from-white to-transparent sm:block" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-14 bg-gradient-to-l from-white to-transparent sm:block" />
 
             {canScrollLeft && (
               <button
                 type="button"
                 aria-label="Scroll categories left"
                 onClick={() => scrollByAmount(-1)}
-                className="absolute -left-2 top-[42%] z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-charcoal shadow-lg transition-all duration-300 hover:scale-105 hover:bg-solar-50 hover:text-solar-700 sm:flex"
+                className="absolute -left-2 top-[42%] z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-700 shadow-[0_4px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-solar-200 hover:bg-solar-50 hover:text-solar-700 sm:flex"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -128,7 +128,7 @@ export default function ProductShowcase() {
                 type="button"
                 aria-label="Scroll categories right"
                 onClick={() => scrollByAmount(1)}
-                className="absolute -right-2 top-[42%] z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-charcoal shadow-lg transition-all duration-300 hover:scale-105 hover:bg-solar-50 hover:text-solar-700 sm:flex"
+                className="absolute -right-2 top-[42%] z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-700 shadow-[0_4px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-solar-200 hover:bg-solar-50 hover:text-solar-700 sm:flex"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>

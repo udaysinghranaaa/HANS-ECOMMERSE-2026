@@ -8,8 +8,9 @@
   --color-solar-600: #16a34a;
   --color-solar-700: #15803d;
   --color-solar-800: #166534;
-  --color-charcoal: #1a1f2e;
-  --color-charcoal-light: #374151;
+  --color-charcoal: #1e293b;
+  --color-charcoal-light: #475569;
+  --color-slate-surface: #f8fafc;
 }
 
 *,
@@ -48,16 +49,18 @@ body {
   min-height: 100vh;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-}
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 
-button {
-  cursor: pointer;
+  button {
+    color: inherit;
+    cursor: pointer;
+  }
 }
 
 img,

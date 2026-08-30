@@ -11,6 +11,7 @@ import {
   isCloudinaryUrl,
   uploadBufferToCloudinary,
 } from './cloudinary.js';
+import { isYouTubeVideoUrl } from './videoUrl.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const uploadsRoot = path.resolve(__dirname, '../../uploads');
@@ -310,7 +311,7 @@ export const deleteProductMedia = async ({
     ),
   );
 
-  if (videoUrl) {
+  if (videoUrl && !isYouTubeVideoUrl(videoUrl)) {
     await deleteProductVideoFile(videoUrl, videoPublicId);
   }
 };

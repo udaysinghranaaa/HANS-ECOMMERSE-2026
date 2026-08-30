@@ -78,6 +78,7 @@ const mapProductBody = (body, files) => {
     imageFiles,
     videoFile,
     removeVideo: body.removeVideo === true || body.removeVideo === 'true',
+    videoLink: body.videoLink,
   };
 };
 

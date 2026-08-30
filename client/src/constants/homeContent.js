@@ -13,16 +13,6 @@ export const navDropdowns = [
         path: '/learn/solar-buying-guide',
         description: 'Choose the right solar system for your needs',
       },
-      {
-        label: 'How Solar Systems Work',
-        path: '/learn/how-solar-works',
-        description: 'Understand panels, inverters and batteries',
-      },
-      {
-        label: 'Solar Subsidy Guide',
-        path: '/learn/solar-subsidy-guide',
-        description: 'Learn about available government subsidies',
-      },
     ],
   },
   {
@@ -32,16 +22,6 @@ export const navDropdowns = [
         label: 'PM Surya Ghar Yojana',
         path: '/subsidy/pm-surya-ghar',
         description: 'Residential rooftop solar subsidy scheme',
-      },
-      {
-        label: 'State Subsidy Programs',
-        path: '/subsidy/state-programs',
-        description: 'State-wise solar incentive details',
-      },
-      {
-        label: 'Subsidy Application Guide',
-        path: '/subsidy/application-guide',
-        description: 'Step-by-step subsidy application help',
       },
     ],
   },
@@ -114,20 +94,6 @@ export const learnCards = [
     description:
       'Learn how to evaluate capacity, budget and product quality before buying solar.',
     icon: 'BookOpen',
-  },
-  {
-    title: 'How Solar Systems Work',
-    path: '/learn/how-solar-works',
-    description:
-      'Understand how sunlight becomes usable electricity for your home or business.',
-    icon: 'Lightbulb',
-  },
-  {
-    title: 'Solar Subsidy Guide',
-    path: '/learn/solar-subsidy-guide',
-    description:
-      'Explore government schemes and incentives available for solar adoption.',
-    icon: 'FileText',
   },
 ];
 

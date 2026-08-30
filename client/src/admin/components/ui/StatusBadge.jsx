@@ -5,7 +5,9 @@ export default function StatusBadge({ active, label, status }) {
     NEW: 'bg-blue-50 text-blue-700 ring-blue-600/20',
     CONTACTED: 'bg-amber-50 text-amber-700 ring-amber-600/20',
     IN_PROGRESS: 'bg-orange-50 text-orange-700 ring-orange-600/20',
-    RESOLVED: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    CONVERTED: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    CLOSED: 'bg-slate-100 text-slate-600 ring-slate-500/10',
+    RESOLVED: 'bg-slate-100 text-slate-600 ring-slate-500/10',
   };
 
   const displayLabel =

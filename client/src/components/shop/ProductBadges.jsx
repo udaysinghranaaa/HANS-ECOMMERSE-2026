@@ -16,7 +16,11 @@ export function ProductSaleBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 font-bold uppercase tracking-wide text-white shadow-sm ${classes}`}
+      className={`inline-flex items-center gap-1 rounded-full font-bold uppercase tracking-wide text-white shadow-sm ${
+        label === 'Festival Sale'
+          ? 'bg-gradient-to-r from-solar-600 to-emerald-600'
+          : 'bg-gradient-to-r from-amber-500 to-orange-500'
+      } ${classes}`}
     >
       {label === 'Festival Sale' ? (
         <Sparkles className={size === 'lg' ? 'h-4 w-4' : 'h-3 w-3'} />

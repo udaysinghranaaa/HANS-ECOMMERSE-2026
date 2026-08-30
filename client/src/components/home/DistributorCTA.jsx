@@ -1,6 +1,9 @@
 import Button from '@/components/ui/Button';
+import { useEnquiryModal } from '@/context/EnquiryModalContext';
 
 export default function DistributorCTA() {
+  const { openEnquiryModal } = useEnquiryModal();
+
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -17,10 +20,10 @@ export default function DistributorCTA() {
               trusted products and reliable support.
             </p>
             <Button
-              to="/distributor"
               variant="white"
               size="lg"
               className="mt-8"
+              onClick={() => openEnquiryModal({ enquiryType: 'distributor' })}
             >
               Become a Distributor
             </Button>

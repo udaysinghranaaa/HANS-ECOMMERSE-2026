@@ -29,6 +29,7 @@ export const api = createApi({
     'HomepageBanner',
     'Festival',
     'SiteMedia',
+    'Enquiries',
   ],
   endpoints: () => ({}),
 });

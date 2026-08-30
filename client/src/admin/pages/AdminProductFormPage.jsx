@@ -18,6 +18,12 @@ import {
   useUpdateProductMutation,
 } from '@/services/productsApi';
 import { stripMediaUrl } from '@/utils/format';
+import {
+  getYouTubeEmbedUrl,
+  getYouTubeWatchUrl,
+  isYouTubeVideoUrl,
+} from '@/utils/video';
+import ProductVideo from '@/components/shop/ProductVideo';
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
@@ -62,6 +68,8 @@ export default function AdminProductFormPage() {
   const [existingVideoUrl, setExistingVideoUrl] = useState('');
   const [newVideoFile, setNewVideoFile] = useState(null);
   const [newVideoPreview, setNewVideoPreview] = useState('');
+  const [videoMode, setVideoMode] = useState('none');
+  const [youtubeLink, setYoutubeLink] = useState('');
   const [removeVideo, setRemoveVideo] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
@@ -102,7 +110,23 @@ export default function AdminProductFormPage() {
 
     setSpecRows(specs.length > 0 ? specs : [emptySpecRow()]);
     setExistingImages(product.images ?? []);
-    setExistingVideoUrl(product.videoUrl ?? '');
+
+    const productVideoUrl = product.videoUrl ?? '';
+    setExistingVideoUrl(productVideoUrl);
+    setRemoveVideo(false);
+    setNewVideoFile(null);
+    setNewVideoPreview('');
+
+    if (isYouTubeVideoUrl(productVideoUrl)) {
+      setVideoMode('youtube');
+      setYoutubeLink(getYouTubeWatchUrl(productVideoUrl) || productVideoUrl);
+    } else if (productVideoUrl) {
+      setVideoMode('upload');
+      setYoutubeLink('');
+    } else {
+      setVideoMode('none');
+      setYoutubeLink('');
+    }
   }, [product]);
 
   useEffect(
@@ -169,6 +193,12 @@ export default function AdminProductFormPage() {
         nextErrors.saleDiscountPercent = 'Enter a valid sale discount percentage';
       } else if (salePercent <= 0 || salePercent >= 100) {
         nextErrors.saleDiscountPercent = 'Sale discount must be between 1 and 99';
+      }
+    }
+
+    if (videoMode === 'youtube' && youtubeLink.trim()) {
+      if (!getYouTubeEmbedUrl(youtubeLink.trim())) {
+        nextErrors.youtubeLink = 'Enter a valid YouTube video link';
       }
     }
 
@@ -259,6 +289,66 @@ export default function AdminProductFormPage() {
     setNewVideoFile(file);
     setNewVideoPreview(URL.createObjectURL(file));
     setRemoveVideo(false);
+    setVideoMode('upload');
+    setYoutubeLink('');
+  };
+
+  const handleVideoModeChange = (mode) => {
+    setVideoMode(mode);
+    setErrors((current) => ({ ...current, video: '', youtubeLink: '' }));
+    setRemoveVideo(false);
+
+    if (mode === 'none') {
+      setNewVideoFile(null);
+      if (newVideoPreview) {
+        URL.revokeObjectURL(newVideoPreview);
+        setNewVideoPreview('');
+      }
+      setYoutubeLink('');
+      if (existingVideoUrl || newVideoFile) {
+        setRemoveVideo(true);
+      }
+      setExistingVideoUrl('');
+    }
+
+    if (mode === 'upload') {
+      setYoutubeLink('');
+    }
+
+    if (mode === 'youtube') {
+      setNewVideoFile(null);
+      if (newVideoPreview) {
+        URL.revokeObjectURL(newVideoPreview);
+        setNewVideoPreview('');
+      }
+    }
+  };
+
+  const clearUploadedVideo = () => {
+    setNewVideoFile(null);
+    if (newVideoPreview) {
+      URL.revokeObjectURL(newVideoPreview);
+      setNewVideoPreview('');
+    }
+    setExistingVideoUrl('');
+    setRemoveVideo(true);
+    setVideoMode('none');
+  };
+
+  const appendVideoFields = (formData) => {
+    if (videoMode === 'upload' && newVideoFile) {
+      formData.append('video', newVideoFile);
+      return;
+    }
+
+    if (videoMode === 'youtube') {
+      formData.append('videoLink', youtubeLink.trim());
+      return;
+    }
+
+    if (removeVideo || videoMode === 'none') {
+      formData.append('removeVideo', 'true');
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -295,11 +385,7 @@ export default function AdminProductFormPage() {
         'existingImages',
         JSON.stringify(existingImages.map(stripMediaUrl)),
       );
-      formData.append('removeVideo', String(removeVideo));
-
-      if (newVideoFile) {
-        formData.append('video', newVideoFile);
-      }
+      appendVideoFields(formData);
 
       try {
         await updateProduct({ id, formData }).unwrap();
@@ -312,9 +398,7 @@ export default function AdminProductFormPage() {
       return;
     }
 
-    if (newVideoFile) {
-      formData.append('video', newVideoFile);
-    }
+    appendVideoFields(formData);
 
     try {
       await createProduct(formData).unwrap();
@@ -635,7 +719,7 @@ export default function AdminProductFormPage() {
         </div>
 
         <div>
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <label className="text-sm font-semibold text-slate-700">
               Product Images * ({totalImages}/{MAX_IMAGES})
             </label>
@@ -643,9 +727,9 @@ export default function AdminProductFormPage() {
               type="button"
               onClick={() => imageInputRef.current?.click()}
               disabled={totalImages >= MAX_IMAGES}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <ImagePlus className="h-4 w-4" />
+              <ImagePlus className="h-4 w-4 text-amber-600" />
               Add Images
             </button>
           </div>
@@ -660,65 +744,97 @@ export default function AdminProductFormPage() {
               event.target.value = '';
             }}
           />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {existingImages.map((imageUrl) => (
-              <div
-                key={imageUrl}
-                className="group relative overflow-hidden rounded-xl border border-slate-200"
-              >
-                <img
-                  src={imageUrl}
-                  alt="Existing product"
-                  className="aspect-square w-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeExistingImage(imageUrl)}
-                  className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
+
+          {totalImages === 0 ? (
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              className="flex w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-slate-600 transition hover:border-amber-300 hover:bg-amber-50/40"
+            >
+              <ImagePlus className="h-10 w-10 text-slate-400" />
+              <span className="text-sm font-medium text-slate-700">
+                Click to upload product images
+              </span>
+              <span className="text-xs text-slate-500">
+                JPG, PNG or WEBP up to 5MB each. Maximum {MAX_IMAGES} images.
+              </span>
+            </button>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {existingImages.map((imageUrl) => (
+                <div
+                  key={imageUrl}
+                  className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-            {newImagePreviews.map((previewUrl, index) => (
-              <div
-                key={previewUrl}
-                className="group relative overflow-hidden rounded-xl border border-slate-200"
-              >
-                <img
-                  src={previewUrl}
-                  alt="New product upload"
-                  className="aspect-square w-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeNewImage(index)}
-                  className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
+                  <img
+                    src={imageUrl}
+                    alt="Existing product"
+                    className="aspect-square w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeExistingImage(imageUrl)}
+                    className="absolute right-2 top-2 rounded-full bg-white/95 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {newImagePreviews.map((previewUrl, index) => (
+                <div
+                  key={previewUrl}
+                  className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <img
+                    src={previewUrl}
+                    alt="New product upload"
+                    className="aspect-square w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNewImage(index)}
+                    className="absolute right-2 top-2 rounded-full bg-white/95 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           {errors.images && (
             <p className="mt-2 text-xs text-red-600">{errors.images}</p>
           )}
         </div>
 
         <div>
-          <div className="mb-3 flex items-center justify-between">
-            <label className="text-sm font-semibold text-slate-700">
-              Product Video
-            </label>
-            <button
-              type="button"
-              onClick={() => videoInputRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-            >
-              <Video className="h-4 w-4" />
-              {existingVideoUrl || newVideoFile ? 'Replace Video' : 'Add Video'}
-            </button>
+          <label className="mb-3 block text-sm font-semibold text-slate-700">
+            Product Video
+          </label>
+          <p className="mb-4 text-xs text-slate-500">
+            Optional. Upload a video file or paste a YouTube link.
+          </p>
+
+          <div className="mb-4 flex flex-wrap gap-2">
+            {[
+              { id: 'none', label: 'No Video' },
+              { id: 'upload', label: 'Upload File' },
+              { id: 'youtube', label: 'YouTube Link' },
+            ].map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => handleVideoModeChange(option.id)}
+                className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
+                  videoMode === option.id
+                    ? 'bg-amber-500 text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
+
           <input
             ref={videoInputRef}
             type="file"
@@ -730,36 +846,87 @@ export default function AdminProductFormPage() {
             }}
           />
 
-          {!removeVideo && (newVideoPreview || existingVideoUrl) ? (
-            <div className="overflow-hidden rounded-xl border border-slate-200">
-              <video
-                controls
-                className="aspect-video w-full bg-black"
-                src={newVideoPreview || existingVideoUrl}
-              />
-              <div className="flex justify-end border-t border-slate-100 p-3">
+          {videoMode === 'upload' && (
+            <div className="overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50">
+              {newVideoPreview || (existingVideoUrl && !isYouTubeVideoUrl(existingVideoUrl)) ? (
+                <div>
+                  <video
+                    controls
+                    className="aspect-video w-full bg-slate-900"
+                    src={newVideoPreview || existingVideoUrl}
+                  />
+                  <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-white p-3">
+                    <button
+                      type="button"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
+                    >
+                      <Video className="h-4 w-4 text-amber-600" />
+                      Replace Video
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearUploadedVideo}
+                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove Video
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    setRemoveVideo(true);
-                    setNewVideoFile(null);
-                    if (newVideoPreview) {
-                      URL.revokeObjectURL(newVideoPreview);
-                      setNewVideoPreview('');
-                    }
-                  }}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700"
+                  onClick={() => videoInputRef.current?.click()}
+                  className="flex w-full flex-col items-center justify-center gap-3 px-6 py-12 text-slate-600 transition hover:bg-amber-50/40"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Remove video
+                  <Video className="h-10 w-10 text-slate-400" />
+                  <span className="text-sm font-medium text-slate-700">
+                    Click to upload product video
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    MP4, WEBM or MOV up to 50MB
+                  </span>
                 </button>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
-              Upload one MP4, WEBM or MOV product video (optional, max 50MB)
+              )}
             </div>
           )}
+
+          {videoMode === 'youtube' && (
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div>
+                <label
+                  htmlFor="youtube-link"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  YouTube Video URL
+                </label>
+                <input
+                  id="youtube-link"
+                  type="url"
+                  value={youtubeLink}
+                  onChange={(event) => {
+                    setYoutubeLink(event.target.value);
+                    setErrors((current) => ({ ...current, youtubeLink: '' }));
+                    setRemoveVideo(false);
+                  }}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                />
+                {errors.youtubeLink && (
+                  <p className="mt-1 text-xs text-red-600">{errors.youtubeLink}</p>
+                )}
+              </div>
+
+              {getYouTubeEmbedUrl(youtubeLink) && (
+                <ProductVideo
+                  videoUrl={youtubeLink}
+                  title="YouTube preview"
+                />
+              )}
+            </div>
+          )}
+
           {errors.video && (
             <p className="mt-2 text-xs text-red-600">{errors.video}</p>
           )}

@@ -10,11 +10,14 @@ import {
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/shop/ProductCard';
 import { ProductDetailBadges } from '@/components/shop/ProductBadges';
+import ProductVideo from '@/components/shop/ProductVideo';
+import { useEnquiryModal } from '@/context/EnquiryModalContext';
 import { useGetPublicProductByIdQuery } from '@/services/productsApi';
 import { formatCurrency, getAmountSaved, getEffectiveProductPricing } from '@/utils/format';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const { openEnquiryModal } = useEnquiryModal();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { data, isLoading, isError } = useGetPublicProductByIdQuery(id);
 
@@ -108,21 +111,18 @@ export default function ProductDetailPage() {
             </div>
 
             {product.videoUrl && (
-              <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
+              <div className="mt-6">
+                <div className="mb-3 flex items-center gap-2 px-1">
                   <PlayCircle className="h-5 w-5 text-solar-600" />
                   <h2 className="text-sm font-semibold text-charcoal">
                     Product Video
                   </h2>
                 </div>
-                <video
-                  controls
-                  className="aspect-video w-full bg-black"
+                <ProductVideo
+                  videoUrl={product.videoUrl}
                   poster={activeImage}
-                >
-                  <source src={product.videoUrl} />
-                  Your browser does not support the video tag.
-                </video>
+                  title={`${product.name} video`}
+                />
               </div>
             )}
           </div>
@@ -175,10 +175,27 @@ export default function ProductDetailPage() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button to="/contact" size="lg">
+              <Button
+                size="lg"
+                onClick={() =>
+                  openEnquiryModal({
+                    enquiryType: 'product',
+                    productName: product.name,
+                  })
+                }
+              >
                 Enquire Now
               </Button>
-              <Button to="/quote" variant="secondary" size="lg">
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() =>
+                  openEnquiryModal({
+                    enquiryType: 'quote',
+                    productName: product.name,
+                  })
+                }
+              >
                 Get a Quote
               </Button>
             </div>

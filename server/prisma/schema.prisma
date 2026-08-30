@@ -14,7 +14,8 @@ enum EnquiryStatus {
   NEW
   CONTACTED
   IN_PROGRESS
-  RESOLVED
+  CONVERTED
+  CLOSED
 }
 
 model Category {

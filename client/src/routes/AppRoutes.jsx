@@ -4,7 +4,12 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import HomePage from '@/pages/HomePage';
 import ShopPage from '@/pages/ShopPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
+import ContactPage from '@/pages/ContactPage';
+import QuotePage from '@/pages/QuotePage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
+import DistributorPage from '@/pages/DistributorPage';
+import LearnPage from '@/pages/LearnPage';
+import SubsidyPage from '@/pages/SubsidyPage';
 
 const placeholder = (title, description, ctaLabel, ctaPath) => (
   <PlaceholderPage
@@ -29,51 +34,11 @@ export default function AppRoutes() {
         <Route path="/shop/product/:id" element={<ProductDetailPage />} />
         <Route path="/shop/:category" element={<ShopPage />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route
-          path="/contact"
-          element={placeholder(
-            'Contact Us',
-            'Reach out to our solar experts for product guidance, quotes and support.',
-            'Get a Quote',
-            '/quote',
-          )}
-        />
-        <Route
-          path="/quote"
-          element={placeholder(
-            'Get a Quote',
-            'Request a customised solar quote for your home, business or industrial project.',
-            'Contact Us',
-            '/contact',
-          )}
-        />
-        <Route
-          path="/distributor"
-          element={placeholder(
-            'Become a Distributor',
-            'Partner with HANS Solar and grow your business with trusted products and support.',
-            'Contact Us',
-            '/contact',
-          )}
-        />
-        <Route
-          path="/learn/:topic"
-          element={placeholder(
-            'Solar Learning Center',
-            'Educational content about solar energy, buying guides and subsidy information.',
-            'Back to Home',
-            '/',
-          )}
-        />
-        <Route
-          path="/subsidy/:topic"
-          element={placeholder(
-            'Solar Subsidy Information',
-            'Detailed subsidy scheme information and application guidance will be available here.',
-            'Learn About Subsidy',
-            '/learn/solar-subsidy-guide',
-          )}
-        />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/quote" element={<QuotePage />} />
+        <Route path="/distributor" element={<DistributorPage />} />
+        <Route path="/learn/:topic" element={<LearnPage />} />
+        <Route path="/subsidy/:topic" element={<SubsidyPage />} />
         <Route
           path="/privacy-policy"
           element={placeholder(

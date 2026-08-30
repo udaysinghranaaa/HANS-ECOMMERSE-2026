@@ -77,16 +77,16 @@ export default function BannerCarousel() {
 
   if (isLoading) {
     return (
-      <section className="flex h-[450px] w-full items-center justify-center bg-gray-100 md:h-[500px] lg:h-[600px]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-solar-200 border-t-solar-600" />
+      <section className="flex h-[420px] w-full items-center justify-center bg-slate-100 md:h-[500px] lg:h-[560px]">
+        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-solar-100 border-t-solar-600" />
       </section>
     );
   }
 
   if (isError || totalSlides === 0) {
     return (
-      <section className="flex h-[450px] w-full items-center justify-center bg-gray-100 md:h-[500px] lg:h-[600px]">
-        <p className="text-sm text-charcoal-light">
+      <section className="flex h-[420px] w-full items-center justify-center bg-slate-100 md:h-[500px] lg:h-[560px]">
+        <p className="text-sm text-slate-600">
           {isError ? 'Unable to load homepage banners.' : 'No banners available.'}
         </p>
       </section>
@@ -95,7 +95,7 @@ export default function BannerCarousel() {
 
   return (
     <section
-      className="group relative w-full overflow-hidden"
+      className="group relative w-full overflow-hidden bg-slate-900"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -111,12 +111,14 @@ export default function BannerCarousel() {
             key={`${banner.id}-${banner.updatedAt}`}
             src={banner.imageUrl}
             alt={banner.title || `Banner ${banner.position}`}
-            className="h-[450px] w-full shrink-0 object-cover object-center md:h-[500px] lg:h-[600px]"
+            className="h-[420px] w-full shrink-0 object-cover object-center md:h-[500px] lg:h-[560px]"
             loading={banner.position === 1 ? 'eager' : 'lazy'}
             decoding="async"
           />
         ))}
       </div>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-900/25 to-transparent" />
 
       {totalSlides > 1 && (
         <>
@@ -124,7 +126,7 @@ export default function BannerCarousel() {
             type="button"
             aria-label="Previous banner"
             onClick={goPrev}
-            className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition hover:bg-white md:left-5 md:h-11 md:w-11"
+            className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white md:left-5 md:h-11 md:w-11 lg:opacity-0 lg:group-hover:opacity-100"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -133,22 +135,23 @@ export default function BannerCarousel() {
             type="button"
             aria-label="Next banner"
             onClick={goNext}
-            className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition hover:bg-white md:right-5 md:h-11 md:w-11"
+            className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white md:right-5 md:h-11 md:w-11 lg:opacity-0 lg:group-hover:opacity-100"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-slate-900/30 px-3 py-2 backdrop-blur-sm">
             {banners.map((banner, index) => (
               <button
                 key={banner.id}
                 type="button"
                 aria-label={`Go to banner ${index + 1}`}
+                aria-current={index === safeIndex ? 'true' : undefined}
                 onClick={() => goToSlide(index)}
-                className={`h-2.5 rounded-full transition-all ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   index === safeIndex
-                    ? 'w-8 bg-solar-600'
-                    : 'w-2.5 bg-white/80 hover:bg-white'
+                    ? 'w-7 bg-solar-500'
+                    : 'w-2 bg-white/70 hover:bg-white'
                 }`}
               />
             ))}

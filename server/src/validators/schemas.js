@@ -5,6 +5,28 @@ export const adminLoginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const contactEnquirySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(120, 'Name is too long'),
+  email: z.string().trim().email('A valid email is required'),
+  phone: z
+    .string()
+    .trim()
+    .min(10, 'Enter a valid phone number')
+    .max(20, 'Phone number is too long')
+    .regex(/^[\d+\s()-]+$/, 'Enter a valid phone number'),
+  message: z
+    .string()
+    .trim()
+    .min(10, 'Please describe your requirement')
+    .max(2000, 'Message is too long'),
+  enquiryType: z.enum(['contact', 'distributor', 'product', 'quote']).optional(),
+  productName: z.string().trim().max(200).optional(),
+});
+
 export const homepageBannerUpdateSchema = z.object({
   title: z.string().trim().min(1).max(120).optional(),
   isActive: z
@@ -21,6 +43,15 @@ export const homepageBannerUpdateSchema = z.object({
 
       return value === 'true';
     }),
+});
+
+export const updateEnquiryStatusSchema = z.object({
+  status: z.enum(
+    ['NEW', 'CONTACTED', 'IN_PROGRESS', 'CONVERTED', 'CLOSED'],
+    {
+      message: 'A valid enquiry status is required',
+    },
+  ),
 });
 
 export const validateBody = (schema) => (req, _res, next) => {

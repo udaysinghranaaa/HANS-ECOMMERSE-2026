@@ -1,6 +1,9 @@
 import Button from '@/components/ui/Button';
+import { useEnquiryModal } from '@/context/EnquiryModalContext';
 
 export default function ContactCTA() {
+  const { openEnquiryModal } = useEnquiryModal();
+
   return (
     <section className="border-y border-gray-100 bg-gray-50 py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -16,7 +19,11 @@ export default function ContactCTA() {
             <Button to="/contact" size="lg">
               Contact Us
             </Button>
-            <Button to="/quote" variant="secondary" size="lg">
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => openEnquiryModal({ enquiryType: 'quote' })}
+            >
               Get a Quote
             </Button>
           </div>

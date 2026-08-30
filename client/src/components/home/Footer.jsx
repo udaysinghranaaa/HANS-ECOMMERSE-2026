@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Loader2, Mail, MapPin } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { contactInfo, corporateOffice } from '@/constants/homeContent';
+import { useEnquiryModal } from '@/context/EnquiryModalContext';
 import { useGetPublicCategoriesQuery } from '@/services/categoriesApi';
 import { useGetSiteMediaQuery } from '@/services/siteMediaApi';
 
@@ -12,13 +13,13 @@ const quickLinks = [
   { label: 'Contact', path: '/contact' },
   { label: 'Learn', path: '/learn/solar-buying-guide' },
   { label: 'Subsidy', path: '/subsidy/pm-surya-ghar' },
-  { label: 'Become a Distributor', path: '/distributor' },
+  { label: 'Become a Distributor', enquiryType: 'distributor' },
 ];
 
 const supportLinks = [
   { label: 'Contact Us', path: '/contact' },
-  { label: 'Get a Quote', path: '/quote' },
-  { label: 'Distributor Enquiry', path: '/distributor' },
+  { label: 'Get a Quote', enquiryType: 'quote' },
+  { label: 'Distributor Enquiry', enquiryType: 'distributor' },
 ];
 
 const legalLinks = [
@@ -26,21 +27,31 @@ const legalLinks = [
   { label: 'Terms & Conditions', path: '/terms-and-conditions' },
 ];
 
-function FooterLinkList({ title, links }) {
+function FooterLinkList({ title, links, onOpenEnquiry }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
         {title}
       </h3>
       <ul className="mt-4 space-y-2.5">
-        {links.map(({ label, path }) => (
-          <li key={path}>
-            <Link
-              to={path}
-              className="text-sm text-gray-300 transition-colors hover:text-white"
-            >
-              {label}
-            </Link>
+        {links.map((link) => (
+          <li key={link.label}>
+            {link.enquiryType ? (
+              <button
+                type="button"
+                onClick={() => onOpenEnquiry(link.enquiryType)}
+                className="text-sm text-slate-400 transition-colors hover:text-white"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <Link
+                to={link.path}
+                className="text-sm text-slate-400 transition-colors hover:text-white"
+              >
+                {link.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>
@@ -57,7 +68,7 @@ function FooterCategories() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-400">
+      <div className="flex items-center gap-2 text-sm text-slate-500">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading categories...
       </div>
@@ -70,7 +81,7 @@ function FooterCategories() {
         <li>
           <Link
             to="/shop"
-            className="text-sm text-gray-300 transition-colors hover:text-white"
+            className="text-sm text-slate-400 transition-colors hover:text-white"
           >
             Browse Shop
           </Link>
@@ -85,7 +96,7 @@ function FooterCategories() {
         <li key={category.id}>
           <Link
             to={`/shop/${category.slug}`}
-            className="text-sm text-gray-300 transition-colors hover:text-white"
+            className="text-sm text-slate-400 transition-colors hover:text-white"
           >
             {category.name}
           </Link>
@@ -96,20 +107,25 @@ function FooterCategories() {
 }
 
 export default function Footer() {
+  const { openEnquiryModal } = useEnquiryModal();
   const { data: siteMediaResponse } = useGetSiteMediaQuery();
   const logoSrc = siteMediaResponse?.data?.logo ?? '/logo.jpg';
   const [logoError, setLogoError] = useState(false);
 
+  const handleOpenEnquiry = (enquiryType) => {
+    openEnquiryModal({ enquiryType });
+  };
+
   return (
-    <footer className="bg-charcoal text-gray-300">
-      <div className="border-b border-white/10 bg-charcoal-light/20">
+    <footer className="bg-slate-900 text-slate-300">
+      <div className="border-b border-white/8 bg-slate-800/40">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-6 rounded-2xl border border-white/10 bg-white/5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div className="flex flex-col gap-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-solar-200">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-solar-300">
                 Visit Our Office
               </p>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-300">
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
                 {corporateOffice.address}
               </p>
             </div>
@@ -119,7 +135,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               variant="white"
               size="sm"
-              className="shrink-0"
+              className="shrink-0 rounded-xl"
             >
               Get Directions
             </Button>
@@ -142,7 +158,7 @@ export default function Footer() {
                 <span className="text-xl font-bold text-white">HANS Solar</span>
               )}
             </Link>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-gray-400">
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
               HANS Solar delivers trusted solar products and complete energy
               solutions for homes, businesses and industries — powering a cleaner,
               brighter future.
@@ -150,49 +166,63 @@ export default function Footer() {
           </div>
 
           <div className="lg:col-span-2">
-            <FooterLinkList title="Quick Links" links={quickLinks} />
+            <FooterLinkList
+              title="Quick Links"
+              links={quickLinks}
+              onOpenEnquiry={handleOpenEnquiry}
+            />
           </div>
 
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
               Products & Categories
             </h3>
             <FooterCategories />
           </div>
 
           <div className="lg:col-span-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
               Contact
             </h3>
             <ul className="mt-4 space-y-4">
               <li>
                 <a
                   href={`mailto:${contactInfo.email}`}
-                  className="inline-flex items-start gap-3 text-sm text-gray-300 transition-colors hover:text-white"
+                  className="inline-flex items-start gap-3 text-sm text-slate-400 transition-colors hover:text-white"
                 >
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-solar-400" />
                   <span>{contactInfo.email}</span>
                 </a>
               </li>
-              <li className="inline-flex items-start gap-3 text-sm text-gray-300">
+              <li className="inline-flex items-start gap-3 text-sm text-slate-400">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-solar-400" />
                 <span className="leading-relaxed">{corporateOffice.address}</span>
               </li>
             </ul>
 
             <div className="mt-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                 Support
               </h4>
               <ul className="mt-3 space-y-2.5">
-                {supportLinks.map(({ label, path }) => (
-                  <li key={path}>
-                    <Link
-                      to={path}
-                      className="text-sm text-gray-300 transition-colors hover:text-white"
-                    >
-                      {label}
-                    </Link>
+                {supportLinks.map((link) => (
+                  <li key={link.label}>
+                    {link.enquiryType ? (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEnquiry(link.enquiryType)}
+                        className="text-sm text-slate-400 transition-colors hover:text-white"
+                      >
+                        {link.label}
+                      </button>
+                    ) : (
+                      <Link
+                        to={link.path}
+                        className="text-sm text-slate-400 transition-colors hover:text-white"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -200,8 +230,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-gray-400">
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/8 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
             © {new Date().getFullYear()} HANS Solar. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-4">
@@ -209,7 +239,7 @@ export default function Footer() {
               <Link
                 key={path}
                 to={path}
-                className="text-sm text-gray-400 transition-colors hover:text-white"
+                className="text-sm text-slate-500 transition-colors hover:text-white"
               >
                 {label}
               </Link>

@@ -6,6 +6,7 @@ import '@/services/homepageBannerApi';
 import '@/services/festivalsApi';
 import '@/services/productsApi';
 import '@/services/categoriesApi';
+import '@/services/enquiriesApi';
 import '@/services/siteMediaApi';
 
 export const store = configureStore({
