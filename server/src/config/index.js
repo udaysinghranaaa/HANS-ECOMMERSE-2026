@@ -8,6 +8,17 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const stripEnv = (value) => value?.trim().replace(/^["']|["']$/g, '') ?? '';
 
+const parseClientUrls = (value) => {
+  const raw = stripEnv(value) || 'http://localhost:5173';
+
+  return raw
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+};
+
+const clientUrls = parseClientUrls(process.env.CLIENT_URL);
+
 const config = {
   env: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT) || 5000,
@@ -16,8 +27,9 @@ const config = {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-  serverUrl: process.env.SERVER_URL || 'http://localhost:5000',
+  clientUrls,
+  clientUrl: clientUrls[0],
+  serverUrl: stripEnv(process.env.SERVER_URL) || 'http://localhost:5000',
   admin: {
     email: process.env.ADMIN_EMAIL?.trim().toLowerCase(),
     password: process.env.ADMIN_PASSWORD,
