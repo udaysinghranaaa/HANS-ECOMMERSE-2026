@@ -131,8 +131,8 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-14">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-12">
           <div className="space-y-6 lg:sticky lg:top-24 lg:z-10 lg:self-start">
             <ProductDetailMediaGallery key={product.id} product={product} images={images} />
             <ProductVideosSection product={product} poster={videoPoster} />

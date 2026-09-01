@@ -19,7 +19,7 @@ export default function FeatureSection() {
   const { ref: sectionRef, isVisible } = useRevealOnScroll();
 
   return (
-    <section ref={sectionRef} className="border-y border-slate-100 bg-slate-50/70 py-16 sm:py-24">
+    <section ref={sectionRef} className="border-y border-slate-100 bg-slate-50/70 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`reveal-up ${isVisible ? 'is-visible' : ''}`}>
           <SectionHeader
@@ -29,7 +29,7 @@ export default function FeatureSection() {
           />
         </div>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
           {trustFeatures.map(({ title, description, icon }, index) => {
             const Icon = iconMap[icon];
             return (

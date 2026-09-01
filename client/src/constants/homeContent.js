@@ -1,7 +1,7 @@
 export const navLinks = [
-  { label: 'Home', path: '/' },
-  { label: 'Shop', path: '/shop' },
-  { label: 'Contact', path: '/contact' },
+  { label: 'Home', path: '/', icon: 'Home' },
+  { label: 'Shop', path: '/shop', icon: 'ShoppingBag' },
+  { label: 'Contact', path: '/contact', icon: 'MessageCircle' },
 ];
 
 export const navDropdowns = [
@@ -110,6 +110,8 @@ export const corporateOffice = {
 
 export const contactInfo = {
   email: 'hanssolarenergy@gmail.com',
+  phone: '9358622621',
+  phoneDisplay: '+91 93586 22621',
 };
 
 export const aboutUsVideo = {

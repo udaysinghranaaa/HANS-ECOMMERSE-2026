@@ -5,6 +5,21 @@ export const adminLoginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const adminTotpCodeSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Enter a valid 6-digit authenticator code'),
+});
+
+export const adminBackupCodeSchema = z.object({
+  backupCode: z
+    .string()
+    .trim()
+    .min(6, 'Enter a valid backup recovery code')
+    .max(12, 'Enter a valid backup recovery code'),
+});
+
 export const contactEnquirySchema = z.object({
   name: z
     .string()
@@ -24,6 +39,7 @@ export const contactEnquirySchema = z.object({
     .min(10, 'Please describe your requirement')
     .max(2000, 'Message is too long'),
   enquiryType: z.enum(['contact', 'distributor', 'product', 'quote']).optional(),
+  formSource: z.enum(['siteSurvey']).optional(),
   productName: z.string().trim().max(200).optional(),
 });
 

@@ -25,7 +25,7 @@ export default function InstallationGallerySection() {
     siteMediaResponse?.data?.gallery ?? installationGalleryImages;
 
   return (
-    <section ref={sectionRef} className="bg-white py-16 sm:py-24">
+    <section ref={sectionRef} className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`reveal-up ${isVisible ? 'is-visible' : ''}`}>
           <SectionHeader
@@ -39,7 +39,7 @@ export default function InstallationGallerySection() {
         </div>
 
         <div
-          className={`reveal-up mt-12 overflow-hidden rounded-3xl border border-solar-100/80 bg-gradient-to-br from-solar-50/80 via-white to-emerald-50/40 p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] sm:mt-14 sm:p-8 lg:p-10 ${isVisible ? 'is-visible' : ''}`}
+          className={`reveal-up mt-8 overflow-hidden rounded-3xl border border-solar-100/80 bg-gradient-to-br from-solar-50/80 via-white to-emerald-50/40 p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] sm:mt-10 sm:p-8 lg:p-9 ${isVisible ? 'is-visible' : ''}`}
           style={{ animationDelay: '80ms' }}
         >
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -76,7 +76,7 @@ export default function InstallationGallerySection() {
         </div>
 
         <div
-          className={`reveal-up mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4 ${isVisible ? 'is-visible' : ''}`}
+          className={`reveal-up mt-8 grid grid-cols-2 gap-3 sm:mt-9 sm:grid-cols-4 sm:gap-4 ${isVisible ? 'is-visible' : ''}`}
           style={{ animationDelay: '140ms' }}
         >
           {galleryImages.map((image, index) => (

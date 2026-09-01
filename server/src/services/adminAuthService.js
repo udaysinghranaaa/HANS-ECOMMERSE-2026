@@ -2,12 +2,12 @@ import bcrypt from 'bcryptjs';
 import prisma from '../config/prisma.js';
 import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
-import { signAdminToken } from '../utils/jwt.js';
+import { signPendingTotpToken } from '../utils/jwt.js';
 
 export const ensureDefaultAdmin = async () => {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
-  const name = process.env.ADMIN_NAME?.trim() || 'HANS Solar Admin';
+  const name = process.env.ADMIN_NAME?.trim() || 'Akash Rana';
 
   if (!email || !password) {
     console.warn(
@@ -36,6 +36,14 @@ export const ensureDefaultAdmin = async () => {
       data: { name, password: hashedPassword },
     });
     console.log(`Default admin credentials synced for ${email}`);
+    return;
+  }
+
+  if (existingAdmin.name !== name) {
+    await prisma.admin.update({
+      where: { email },
+      data: { name },
+    });
   }
 };
 
@@ -59,10 +67,11 @@ export const loginAdmin = async ({ email, password }) => {
     throw new ApiError(401, 'Invalid email or password');
   }
 
-  const token = signAdminToken(admin.id);
+  const pendingToken = signPendingTotpToken(admin.id);
 
   return {
-    token,
+    step: admin.totpEnabled ? 'verify' : 'setup',
+    pendingToken,
     admin: {
       id: admin.id,
       name: admin.name,

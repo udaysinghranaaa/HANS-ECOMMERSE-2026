@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import ContactEnquiryForm from '@/components/contact/ContactEnquiryForm';
+import { lockBodyScroll, unlockBodyScroll } from '@/utils/bodyScrollLock';
 
 const modalTitles = {
   contact: {
     title: 'Send Us Your Requirement',
     description: 'Fill in your details and our team will reach out shortly.',
+  },
+  siteSurvey: {
+    title: 'Book FREE Site Survey',
+    description:
+      'Share your details and our team will schedule a free site survey for your solar installation.',
   },
   distributor: {
     title: 'Become a Distributor',
@@ -27,6 +33,7 @@ export default function ContactEnquiryModal({
   isOpen,
   enquiryType = 'contact',
   productName = '',
+  formSource = '',
   onClose,
 }) {
   useEffect(() => {
@@ -34,8 +41,7 @@ export default function ContactEnquiryModal({
       return undefined;
     }
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -46,7 +52,7 @@ export default function ContactEnquiryModal({
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockBodyScroll();
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -55,7 +61,11 @@ export default function ContactEnquiryModal({
     return null;
   }
 
-  const copy = modalTitles[enquiryType] ?? modalTitles.contact;
+  const copyKey =
+    enquiryType === 'quote' && formSource === 'siteSurvey'
+      ? 'siteSurvey'
+      : enquiryType;
+  const copy = modalTitles[copyKey] ?? modalTitles.contact;
   const title =
     enquiryType === 'product' && productName
       ? `Enquire About ${productName}`
@@ -91,6 +101,7 @@ export default function ContactEnquiryModal({
           idPrefix={`modal-${enquiryType}`}
           enquiryType={enquiryType}
           productName={productName}
+          formSource={formSource}
           showHeader
           compactSuccess
           title={title}

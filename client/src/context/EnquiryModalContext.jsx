@@ -7,17 +7,19 @@ const initialState = {
   isOpen: false,
   enquiryType: 'contact',
   productName: '',
+  formSource: '',
 };
 
 export function EnquiryModalProvider({ children }) {
   const [modalState, setModalState] = useState(initialState);
 
   const openEnquiryModal = useCallback(
-    ({ enquiryType = 'contact', productName = '' } = {}) => {
+    ({ enquiryType = 'contact', productName = '', formSource = '' } = {}) => {
       setModalState({
         isOpen: true,
         enquiryType,
         productName: productName.trim(),
+        formSource,
       });
     },
     [],
@@ -43,6 +45,7 @@ export function EnquiryModalProvider({ children }) {
         isOpen={modalState.isOpen}
         enquiryType={modalState.enquiryType}
         productName={modalState.productName}
+        formSource={modalState.formSource}
         onClose={closeEnquiryModal}
       />
     </EnquiryModalContext.Provider>

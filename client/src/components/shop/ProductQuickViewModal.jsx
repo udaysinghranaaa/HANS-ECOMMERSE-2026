@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { ProductCardBadges } from '@/components/shop/ProductBadges';
+import { lockBodyScroll, unlockBodyScroll } from '@/utils/bodyScrollLock';
 import {
   formatCurrency,
   getEffectiveProductPricing,
@@ -19,8 +20,7 @@ export default function ProductQuickViewModal({
       return undefined;
     }
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -31,7 +31,7 @@ export default function ProductQuickViewModal({
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockBodyScroll();
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose, product]);

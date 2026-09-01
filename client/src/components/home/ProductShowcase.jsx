@@ -61,7 +61,7 @@ export default function ProductShowcase() {
   } = useCarousel(categories.length);
 
   return (
-    <section ref={sectionRef} className="bg-white py-16 sm:py-20">
+    <section ref={sectionRef} className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           className={`reveal-up flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between ${sectionVisible ? 'is-visible' : ''}`}
@@ -84,15 +84,15 @@ export default function ProductShowcase() {
         </div>
 
         {isLoading ? (
-          <div className="mt-12 flex min-h-60 items-center justify-center">
+          <div className="mt-8 flex min-h-60 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-solar-600" />
           </div>
         ) : isError ? (
-          <div className="mt-12 rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
+          <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
             Unable to load categories right now.
           </div>
         ) : categories.length === 0 ? (
-          <div className="mt-12 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-10 text-center">
+          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-10 text-center">
             <p className="text-sm text-slate-600">
               Categories added from the admin dashboard will appear here
               automatically.
@@ -106,7 +106,7 @@ export default function ProductShowcase() {
             </Link>
           </div>
         ) : useCarouselLayout ? (
-          <div className="relative mt-10">
+          <div className="relative mt-8">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-14 bg-gradient-to-r from-white to-transparent sm:block" />
             <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-14 bg-gradient-to-l from-white to-transparent sm:block" />
 

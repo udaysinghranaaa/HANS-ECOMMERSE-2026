@@ -51,23 +51,33 @@ const buildEnquirySubjectForPayload = ({
   message,
   enquiryType,
   productName,
+  formSource,
 }) => {
   const trimmedProductName = productName?.trim();
+  const type = enquiryType || 'contact';
 
-  if (trimmedProductName) {
-    if (enquiryType === 'quote') {
-      return `Quote Enquiry: ${trimmedProductName}`;
-    }
-
-    return `Product Enquiry: ${trimmedProductName}`;
+  if (type === 'product') {
+    return trimmedProductName
+      ? `Product Enquiry - ${trimmedProductName}`
+      : 'Product Enquiry';
   }
 
-  if (enquiryType === 'distributor') {
+  if (type === 'distributor') {
     return 'Distributor Enquiry';
   }
 
-  if (enquiryType === 'quote') {
-    return 'Quote Enquiry';
+  if (type === 'quote' && formSource === 'siteSurvey') {
+    return 'Free Site Survey';
+  }
+
+  if (type === 'quote') {
+    return trimmedProductName
+      ? `Quote Enquiry - ${trimmedProductName}`
+      : 'Quote Enquiry';
+  }
+
+  if (type === 'contact') {
+    return 'Contact Enquiry';
   }
 
   return buildEnquirySubject(message);
@@ -80,6 +90,7 @@ export const createContactEnquiry = async ({
   message,
   enquiryType,
   productName,
+  formSource,
 }) => {
   const trimmedMessage = message.trim();
 
@@ -92,6 +103,7 @@ export const createContactEnquiry = async ({
         message: trimmedMessage,
         enquiryType,
         productName,
+        formSource,
       }),
       message: trimmedMessage,
       status: 'NEW',

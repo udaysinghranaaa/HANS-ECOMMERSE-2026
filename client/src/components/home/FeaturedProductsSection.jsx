@@ -42,7 +42,7 @@ function ProductCarousel({ products, isVisible, sectionKey, fadeFrom }) {
   const showControls = products.length > 1;
 
   return (
-    <div className="relative mt-10">
+    <div className="relative mt-8 sm:mt-9">
       <CarouselFadeEdges from={fadeFrom} />
 
       {showControls && canScrollLeft && (
@@ -88,21 +88,37 @@ function FeaturedProductBlock({
   products,
   icon,
   background = 'gray',
+  layout = 'standalone',
 }) {
-  const { ref: sectionRef, isVisible } = useRevealOnScroll();
+  const { ref: blockRef, isVisible } = useRevealOnScroll();
 
   if (products.length === 0) {
     return null;
   }
 
   const isGray = background === 'gray';
-  const sectionClass = isGray
-    ? 'border-y border-slate-100 bg-slate-50/70'
-    : 'bg-white';
   const fadeFrom = isGray ? 'from-slate-50' : 'from-white';
 
+  const paddingClass =
+    layout === 'group-start'
+      ? 'pt-12 pb-7 sm:pt-14 sm:pb-8'
+      : layout === 'group-end'
+        ? 'border-t border-slate-200/70 pt-8 pb-12 sm:pt-10 sm:pb-14'
+        : 'py-12 sm:py-14';
+
+  const backgroundClass =
+    layout === 'standalone'
+      ? isGray
+        ? 'border-y border-slate-100 bg-slate-50/70'
+        : 'bg-white'
+      : isGray
+        ? 'bg-slate-50/70'
+        : 'bg-white';
+
+  const Tag = layout === 'standalone' ? 'section' : 'div';
+
   return (
-    <section ref={sectionRef} className={`${sectionClass} py-16 sm:py-20`}>
+    <Tag ref={blockRef} className={`${backgroundClass} ${paddingClass}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`reveal-up ${isVisible ? 'is-visible' : ''}`}>
           <SectionHeader
@@ -120,7 +136,7 @@ function FeaturedProductBlock({
           fadeFrom={fadeFrom}
         />
       </div>
-    </section>
+    </Tag>
   );
 }
 
@@ -149,6 +165,8 @@ export default function FeaturedProductsSection({ section = 'all' }) {
 
   const showTrending = section === 'all' || section === 'trending';
   const showSubsidy = section === 'all' || section === 'subsidy';
+  const hasTrending = showTrending && trendingProducts.length > 0;
+  const hasSubsidy = showSubsidy && subsidyProducts.length > 0;
 
   if (
     (showTrending && trendingProducts.length === 0 && !showSubsidy) ||
@@ -160,9 +178,9 @@ export default function FeaturedProductsSection({ section = 'all' }) {
     return null;
   }
 
-  return (
-    <>
-      {showTrending && trendingProducts.length > 0 && (
+  if (hasTrending && hasSubsidy) {
+    return (
+      <section className="border-y border-slate-100">
         <FeaturedProductBlock
           sectionKey="trending"
           eyebrow="Trending Now"
@@ -171,9 +189,8 @@ export default function FeaturedProductsSection({ section = 'all' }) {
           products={trendingProducts}
           icon={Sparkles}
           background="gray"
+          layout="group-start"
         />
-      )}
-      {showSubsidy && subsidyProducts.length > 0 && (
         <FeaturedProductBlock
           sectionKey="subsidy"
           eyebrow="Subsidy Eligible"
@@ -182,6 +199,36 @@ export default function FeaturedProductsSection({ section = 'all' }) {
           products={subsidyProducts}
           icon={Landmark}
           background="white"
+          layout="group-end"
+        />
+      </section>
+    );
+  }
+
+  return (
+    <>
+      {hasTrending && (
+        <FeaturedProductBlock
+          sectionKey="trending"
+          eyebrow="Trending Now"
+          title="Trending Products"
+          subtitle="Our most popular solar products, loved by customers."
+          products={trendingProducts}
+          icon={Sparkles}
+          background="gray"
+          layout="standalone"
+        />
+      )}
+      {hasSubsidy && (
+        <FeaturedProductBlock
+          sectionKey="subsidy"
+          eyebrow="Subsidy Eligible"
+          title="Top Government Subsidy Products"
+          subtitle="Popular subsidy-eligible solar solutions to help you save more on clean energy."
+          products={subsidyProducts}
+          icon={Landmark}
+          background="white"
+          layout="standalone"
         />
       )}
     </>

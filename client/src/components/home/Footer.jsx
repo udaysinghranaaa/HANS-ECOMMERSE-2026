@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Mail, MapPin } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -107,8 +107,25 @@ function FooterCategories() {
 export default function Footer() {
   const { openEnquiryModal } = useEnquiryModal();
   const { data: siteMediaResponse } = useGetSiteMediaQuery();
-  const logoSrc = siteMediaResponse?.data?.logo ?? '/logo.jpg';
+  const apiLogo = siteMediaResponse?.data?.logo;
+  const [logoSrc, setLogoSrc] = useState(apiLogo ?? '/logo.jpg');
   const [logoError, setLogoError] = useState(false);
+
+  useEffect(() => {
+    if (apiLogo) {
+      setLogoSrc(apiLogo);
+      setLogoError(false);
+    }
+  }, [apiLogo]);
+
+  const handleLogoError = () => {
+    if (logoSrc !== '/logo.jpg') {
+      setLogoSrc('/logo.jpg');
+      return;
+    }
+
+    setLogoError(true);
+  };
 
   const handleOpenEnquiry = (enquiryType) => {
     openEnquiryModal({ enquiryType });
@@ -141,19 +158,21 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <Link to="/" className="inline-flex items-center">
               {!logoError ? (
-                <img
-                  src={logoSrc}
-                  alt="HANS Solar"
-                  className="h-10 w-auto max-w-[140px] brightness-0 invert object-contain"
-                  onError={() => setLogoError(true)}
-                />
+                <span className="inline-flex rounded-xl bg-white px-3.5 py-2.5 shadow-sm ring-1 ring-white/10">
+                  <img
+                    src={logoSrc}
+                    alt="HANS Solar Energy"
+                    className="h-10 w-auto max-w-[160px] object-contain sm:h-11"
+                    onError={handleLogoError}
+                  />
+                </span>
               ) : (
-                <span className="text-xl font-bold text-white">HANS Solar</span>
+                <span className="text-xl font-bold text-white">HANS Solar Energy</span>
               )}
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">

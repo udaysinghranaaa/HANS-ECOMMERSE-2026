@@ -8,7 +8,7 @@ export default function CorporateOfficeSection() {
   const { ref: sectionRef, isVisible } = useRevealOnScroll();
 
   return (
-    <section ref={sectionRef} className="border-t border-slate-100 bg-slate-50/70 py-16 sm:py-24">
+    <section ref={sectionRef} className="border-t border-slate-100 bg-slate-50/70 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`reveal-up ${isVisible ? 'is-visible' : ''}`}>
           <SectionHeader
@@ -21,7 +21,7 @@ export default function CorporateOfficeSection() {
         </div>
 
         <div
-          className={`reveal-up mt-12 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_40px_rgba(15,23,42,0.06)] lg:mt-14 ${isVisible ? 'is-visible' : ''}`}
+          className={`reveal-up mt-8 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_40px_rgba(15,23,42,0.06)] sm:mt-10 ${isVisible ? 'is-visible' : ''}`}
           style={{ animationDelay: '90ms' }}
         >
           <div className="grid lg:grid-cols-2">

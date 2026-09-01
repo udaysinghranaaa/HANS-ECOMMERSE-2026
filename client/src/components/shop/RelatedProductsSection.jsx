@@ -19,7 +19,7 @@ export default function RelatedProductsSection({
   return (
     <section
       aria-label="You may also like"
-      className="mt-16 border-t border-gray-200 bg-gradient-to-b from-white to-slate-50/80 py-12 sm:py-16"
+      className="mt-12 border-t border-gray-200 bg-gradient-to-b from-white to-slate-50/80 py-10 sm:py-14"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -45,7 +45,7 @@ export default function RelatedProductsSection({
 
         {products.length > 0 ? (
           <>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
               {products.map((relatedProduct) => (
                 <div key={relatedProduct.id} className="h-full">
                   <ProductCard

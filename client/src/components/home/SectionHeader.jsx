@@ -27,14 +27,14 @@ export default function SectionHeader({
       </h2>
 
       {subtitle && (
-        <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+        <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg">
           {subtitle}
         </p>
       )}
 
       {showAccent && (
         <div
-          className={`mt-5 flex items-center gap-2.5 ${isCenter ? 'justify-center' : ''}`}
+          className={`mt-4 flex items-center gap-2.5 ${isCenter ? 'justify-center' : ''}`}
           aria-hidden
         >
           <span className="h-px w-10 bg-solar-500/80" />

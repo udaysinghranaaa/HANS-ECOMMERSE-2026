@@ -6,7 +6,7 @@ export default function ContactPage() {
   return (
     <div className="bg-gray-50">
       <section className="border-b border-gray-200 bg-gradient-to-br from-solar-700 via-solar-600 to-emerald-700">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-white/80">
             Get in Touch
           </p>
@@ -86,7 +86,7 @@ export default function ContactPage() {
             </div>
           </aside>
 
-          <ContactEnquiryForm idPrefix="contact" />
+          <ContactEnquiryForm idPrefix="contact" enquiryType="contact" />
         </div>
       </div>
     </div>

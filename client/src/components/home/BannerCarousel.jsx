@@ -73,7 +73,7 @@ export default function BannerCarousel() {
 
   if (isLoading) {
     return (
-      <section className="flex h-[420px] w-full items-center justify-center bg-slate-100 md:h-[500px] lg:h-[560px]">
+      <section className="flex h-[260px] w-full items-center justify-center bg-slate-100 sm:h-[340px] md:h-[500px] lg:h-[560px]">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-solar-100 border-t-solar-600" />
       </section>
     );
@@ -81,7 +81,7 @@ export default function BannerCarousel() {
 
   if (isError || totalSlides === 0) {
     return (
-      <section className="flex h-[420px] w-full items-center justify-center bg-slate-100 md:h-[500px] lg:h-[560px]">
+      <section className="flex h-[260px] w-full items-center justify-center bg-slate-100 sm:h-[340px] md:h-[500px] lg:h-[560px]">
         <p className="text-sm text-slate-600">
           {isError ? 'Unable to load homepage banners.' : 'No banners available.'}
         </p>
@@ -107,7 +107,7 @@ export default function BannerCarousel() {
             key={`${banner.id}-${banner.updatedAt}`}
             src={banner.imageUrl}
             alt={banner.title || `Banner ${banner.position}`}
-            className="h-[420px] w-full shrink-0 object-cover object-center md:h-[500px] lg:h-[560px]"
+            className="h-[260px] w-full shrink-0 bg-slate-900 object-contain object-center sm:h-[340px] sm:object-cover md:h-[500px] lg:h-[560px]"
             loading={banner.position === 1 ? 'eager' : 'lazy'}
             decoding="async"
             fetchPriority={banner.position === 1 ? 'high' : 'auto'}

@@ -25,6 +25,10 @@ export const protectAdmin = catchAsync(async (req, _res, next) => {
       throw new ApiError(403, 'Admin access denied');
     }
 
+    if (decoded.stage !== 'authenticated' || !decoded.totpVerified) {
+      throw new ApiError(401, 'Admin authentication required');
+    }
+
     const admin = await prisma.admin.findUnique({
       where: { id: decoded.id },
       select: { id: true, name: true, email: true },
