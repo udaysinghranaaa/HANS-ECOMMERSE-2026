@@ -12,7 +12,9 @@
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "admin:reset-totp": "node scripts/resetAdminTotp.js",
+    "admin:diagnose-totp": "node scripts/diagnoseAdminTotp.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",

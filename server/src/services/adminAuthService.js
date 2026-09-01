@@ -52,6 +52,13 @@ export const loginAdmin = async ({ email, password }) => {
     throw new ApiError(500, 'JWT secret is not configured on the server');
   }
 
+  if (!config.totp.encryptionKey) {
+    throw new ApiError(
+      500,
+      'TOTP encryption key is not configured on the server',
+    );
+  }
+
   const normalizedEmail = email.trim().toLowerCase();
   const admin = await prisma.admin.findUnique({
     where: { email: normalizedEmail },

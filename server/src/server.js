@@ -6,6 +6,7 @@ import config from './config/index.js';
 import { connectDatabase } from './config/database.js';
 import { ensureDefaultAdmin } from './services/adminAuthService.js';
 import { ensureDefaultCategories } from './services/categoryService.js';
+import { validateTotpEncryptionConfig } from './utils/totpCrypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOCK_FILE = path.resolve(__dirname, '../.server.lock');
@@ -88,6 +89,7 @@ const startServer = async () => {
 
   try {
     acquireLock();
+    validateTotpEncryptionConfig();
     await connectDatabase();
     await ensureDefaultAdmin();
     await ensureDefaultCategories();

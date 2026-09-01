@@ -38,6 +38,7 @@ cp .env.example .env
 | `PORT`           | Server port                    |
 | `MONGODB_URI`    | MongoDB connection string      |
 | `JWT_SECRET`     | JWT signing secret             |
+| `TOTP_ENCRYPTION_KEY` | Stable AES key material for encrypted admin TOTP secrets (recommended in production; falls back to `JWT_SECRET`) |
 | `JWT_EXPIRES_IN` | JWT expiration duration        |
 | `CLIENT_URL`     | Comma-separated frontend origins allowed by CORS |
 

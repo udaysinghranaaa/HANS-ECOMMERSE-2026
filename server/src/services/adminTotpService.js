@@ -4,7 +4,10 @@ import { generateSecret, generateURI, verifySync } from 'otplib';
 import prisma from '../config/prisma.js';
 import ApiError from '../utils/ApiError.js';
 import { generateBackupCodes, verifyBackupCode } from '../utils/backupCodes.js';
-import { decryptTotpSecret, encryptTotpSecret } from '../utils/totpCrypto.js';
+import {
+  decryptTotpSecretOrThrow,
+  encryptTotpSecret,
+} from '../utils/totpCrypto.js';
 import { signAdminToken } from '../utils/jwt.js';
 
 const TOTP_ISSUER = 'HANS Solar Energy';
@@ -79,7 +82,7 @@ export const enableAdminTotp = async (adminId, code) => {
     throw new ApiError(400, 'Two-factor authentication is already enabled');
   }
 
-  const secret = decryptTotpSecret(admin.totpSecretEncrypted);
+  const secret = decryptTotpSecretOrThrow(admin.totpSecretEncrypted);
 
   if (!secret) {
     throw new ApiError(400, 'Two-factor setup has not been initiated');
@@ -116,7 +119,7 @@ export const verifyAdminTotp = async (adminId, code) => {
     throw new ApiError(400, 'Two-factor authentication is not enabled');
   }
 
-  const secret = decryptTotpSecret(admin.totpSecretEncrypted);
+  const secret = decryptTotpSecretOrThrow(admin.totpSecretEncrypted);
 
   if (!secret || !verifyTotpCode(code, secret)) {
     throw new ApiError(401, 'Invalid authenticator code');
