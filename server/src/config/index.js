@@ -8,12 +8,14 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const stripEnv = (value) => value?.trim().replace(/^["']|["']$/g, '') ?? '';
 
+const normalizeOrigin = (value) => stripEnv(value).replace(/\/+$/, '');
+
 const parseClientUrls = (value) => {
   const raw = stripEnv(value) || 'http://localhost:5173';
 
   return raw
     .split(',')
-    .map((entry) => entry.trim())
+    .map((entry) => normalizeOrigin(entry))
     .filter(Boolean);
 };
 

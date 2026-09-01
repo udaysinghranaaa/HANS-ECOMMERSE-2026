@@ -39,7 +39,7 @@ cp .env.example .env
 | `MONGODB_URI`    | MongoDB connection string      |
 | `JWT_SECRET`     | JWT signing secret             |
 | `JWT_EXPIRES_IN` | JWT expiration duration        |
-| `CLIENT_URL`     | Frontend URL for CORS          |
+| `CLIENT_URL`     | Comma-separated frontend origins allowed by CORS |
 
 ## Development
 

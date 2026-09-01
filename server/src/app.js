@@ -18,6 +18,7 @@ app.set('trust proxy', 1);
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow server-to-server/no-origin requests and comma-separated CLIENT_URL origins.
       if (!origin || config.clientUrls.includes(origin)) {
         callback(null, true);
         return;
