@@ -224,3 +224,36 @@ export const pmSuryaGharFaqs = [
 
 export const pmSuryaGharDisclaimer =
   'Subsidy amount, eligibility, technical requirements, net-metering provisions, documentation and other scheme conditions are subject to the latest Government of India/MNRE guidelines and applicable DISCOM/state regulations. Subsidy approval and disbursement are subject to fulfilment of the applicable requirements.';
+
+export const pmSuryaGharHomeCompany = {
+  name: 'HANS SOLAR RENEWABLE ENERGY INDIA PVT. LTD.',
+  vendorLabel: 'Authorized Vendor for PM Surya Ghar Yojana',
+};
+
+export const pmSuryaGharHomeSubsidyCards = [
+  {
+    capacity: '1 kW',
+    amountValue: 30000,
+    amountPrefix: '₹',
+    label: 'Government Subsidy',
+    highlighted: false,
+  },
+  {
+    capacity: '2 kW',
+    amountValue: 60000,
+    amountPrefix: '₹',
+    label: 'Government Subsidy',
+    highlighted: false,
+  },
+  {
+    capacity: '3 kW & Above',
+    amountValue: 78000,
+    amountPrefix: 'Up to ₹',
+    label: 'Government Subsidy',
+    highlighted: true,
+    badge: 'Maximum Subsidy',
+  },
+];
+
+export const pmSuryaGharHomeDisclaimer =
+  '*Subsidy subject to applicable government guidelines, eligibility and DISCOM approval.';

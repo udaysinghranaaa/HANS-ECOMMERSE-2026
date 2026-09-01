@@ -1,4 +1,5 @@
 import Hero from '@/components/home/Hero';
+import PmSuryaGharHomeSection from '@/components/home/PmSuryaGharHomeSection';
 import FestivalSaleSection from '@/components/home/FestivalSaleSection';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import FeaturedProductsSection from '@/components/home/FeaturedProductsSection';
@@ -11,6 +12,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <PmSuryaGharHomeSection />
       <FestivalSaleSection />
       <WhyChooseUs />
       <FeaturedProductsSection section="all" />
