@@ -5,7 +5,7 @@ export const homepageBannerApi = api.injectEndpoints({
     getPublicHomepageBanners: builder.query({
       query: () => '/homepage/banners',
       providesTags: ['HomepageBanner'],
-      keepUnusedDataFor: 15,
+      keepUnusedDataFor: 300,
     }),
     getAdminHomepageBanners: builder.query({
       query: () => '/admin/homepage/banners',

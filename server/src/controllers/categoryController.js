@@ -1,4 +1,5 @@
 import catchAsync from '../utils/catchAsync.js';
+import { setPublicJsonCache } from '../utils/publicCache.js';
 import {
   createCategory,
   deleteCategory,
@@ -12,6 +13,7 @@ import {
 export const getPublicCategoriesHandler = catchAsync(async (_req, res) => {
   const categories = await getPublicCategories();
 
+  setPublicJsonCache(res, 120);
   res.status(200).json({
     success: true,
     data: { categories },
@@ -21,6 +23,7 @@ export const getPublicCategoriesHandler = catchAsync(async (_req, res) => {
 export const getPublicCategoryBySlugHandler = catchAsync(async (req, res) => {
   const category = await getPublicCategoryBySlug(req.params.slug);
 
+  setPublicJsonCache(res, 120);
   res.status(200).json({
     success: true,
     data: { category },

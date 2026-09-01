@@ -97,9 +97,7 @@ function NavDropdown({ label, items, mobile = false, onNavigate }) {
 
 function CategoriesNavDropdown({ mobile = false, onNavigate }) {
   const [open, setOpen] = useState(false);
-  const { data } = useGetPublicCategoriesQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data } = useGetPublicCategoriesQuery();
 
   const categories = data?.data?.categories ?? [];
 

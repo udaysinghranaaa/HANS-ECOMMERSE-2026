@@ -53,9 +53,7 @@ export default function ShopPage() {
     data: productsData,
     isLoading: productsLoading,
     isError,
-  } = useGetPublicProductsQuery(hasQuery ? undefined : categorySlug, {
-    refetchOnMountOrArgChange: true,
-  });
+  } = useGetPublicProductsQuery(hasQuery ? undefined : categorySlug);
 
   const activeCategory = useMemo(
     () =>

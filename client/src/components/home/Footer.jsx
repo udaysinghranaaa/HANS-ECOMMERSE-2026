@@ -60,9 +60,7 @@ function FooterLinkList({ title, links, onOpenEnquiry }) {
 }
 
 function FooterCategories() {
-  const { data, isLoading } = useGetPublicCategoriesQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, isLoading } = useGetPublicCategoriesQuery();
 
   const categories = data?.data?.categories ?? [];
 

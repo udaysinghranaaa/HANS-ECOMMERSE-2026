@@ -1,4 +1,5 @@
 import catchAsync from '../utils/catchAsync.js';
+import { setPublicJsonCache } from '../utils/publicCache.js';
 import {
   assignFestivalProduct,
   assignFestivalProducts,
@@ -23,6 +24,7 @@ const parseBoolean = (value, fallback = undefined) => {
 export const getPublicActiveFestivalHandler = catchAsync(async (_req, res) => {
   const data = await getPublicActiveFestival();
 
+  setPublicJsonCache(res, 60);
   res.status(200).json({
     success: true,
     data: data ?? { festival: null, products: [] },

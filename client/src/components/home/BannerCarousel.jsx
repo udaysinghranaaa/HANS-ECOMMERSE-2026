@@ -6,11 +6,7 @@ const AUTO_SLIDE_MS = 5000;
 const SWIPE_THRESHOLD = 50;
 
 export default function BannerCarousel() {
-  const { data, isLoading, isError } = useGetPublicHomepageBannersQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
-  });
+  const { data, isLoading, isError } = useGetPublicHomepageBannersQuery();
 
   const banners = data?.data?.banners ?? [];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -114,6 +110,7 @@ export default function BannerCarousel() {
             className="h-[420px] w-full shrink-0 object-cover object-center md:h-[500px] lg:h-[560px]"
             loading={banner.position === 1 ? 'eager' : 'lazy'}
             decoding="async"
+            fetchPriority={banner.position === 1 ? 'high' : 'auto'}
           />
         ))}
       </div>

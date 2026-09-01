@@ -5,7 +5,7 @@ export const categoriesApi = api.injectEndpoints({
     getPublicCategories: builder.query({
       query: () => '/catalog/categories',
       providesTags: ['Categories'],
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 300,
     }),
     getPublicCategoryBySlug: builder.query({
       query: (slug) => `/catalog/categories/${slug}`,

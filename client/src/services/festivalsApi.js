@@ -5,7 +5,7 @@ export const festivalsApi = api.injectEndpoints({
     getActiveFestival: builder.query({
       query: () => '/festivals/active',
       providesTags: [{ type: 'Festival', id: 'ACTIVE' }],
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 120,
     }),
     getAdminFestivals: builder.query({
       query: () => '/admin/festivals',

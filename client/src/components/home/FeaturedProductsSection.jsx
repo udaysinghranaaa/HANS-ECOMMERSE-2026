@@ -125,9 +125,7 @@ function FeaturedProductBlock({
 }
 
 export default function FeaturedProductsSection({ section = 'all' }) {
-  const { data, isLoading } = useGetFeaturedProductsQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, isLoading } = useGetFeaturedProductsQuery();
 
   const trendingProducts = useMemo(
     () =>

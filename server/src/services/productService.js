@@ -234,21 +234,23 @@ export const getPublicProducts = async ({ categorySlug } = {}) => {
     where.category = { slug: categorySlug, isActive: true };
   }
 
-  const products = await prisma.product.findMany({
-    where,
-    include: productInclude,
-    orderBy: { createdAt: 'desc' },
-  });
+  const [products, activeFestival] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: productInclude,
+      orderBy: { createdAt: 'desc' },
+    }),
+    findActiveFestival(),
+  ]);
 
-  const activeFestival = await findActiveFestival();
   return formatPublicProducts(products, activeFestival);
 };
 
 export const getFeaturedProducts = async () => {
   const baseWhere = { isActive: true };
-  const activeFestival = await findActiveFestival();
 
-  const [trendingProducts, subsidyProducts] = await Promise.all([
+  const [activeFestival, trendingProducts, subsidyProducts] = await Promise.all([
+    findActiveFestival(),
     prisma.product.findMany({
       where: { ...baseWhere, isTrending: true },
       include: productInclude,
@@ -268,10 +270,13 @@ export const getFeaturedProducts = async () => {
 };
 
 export const getPublicProductById = async (id) => {
-  const product = await prisma.product.findFirst({
-    where: { id, isActive: true },
-    include: productInclude,
-  });
+  const [product, activeFestival] = await Promise.all([
+    prisma.product.findFirst({
+      where: { id, isActive: true },
+      include: productInclude,
+    }),
+    findActiveFestival(),
+  ]);
 
   if (!product) {
     throw new ApiError(404, 'Product not found');
@@ -287,8 +292,6 @@ export const getPublicProductById = async (id) => {
     orderBy: { createdAt: 'desc' },
     take: 4,
   });
-
-  const activeFestival = await findActiveFestival();
 
   return {
     product: formatPublicProduct(product, activeFestival),

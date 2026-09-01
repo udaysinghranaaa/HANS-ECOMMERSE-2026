@@ -5,6 +5,7 @@ export const siteMediaApi = api.injectEndpoints({
     getSiteMedia: builder.query({
       query: () => '/site/media',
       providesTags: [{ type: 'SiteMedia', id: 'PUBLIC' }],
+      keepUnusedDataFor: 300,
     }),
     getAdminSiteMedia: builder.query({
       query: () => '/admin/site/media',

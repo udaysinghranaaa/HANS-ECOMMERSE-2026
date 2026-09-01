@@ -14,16 +14,17 @@ export const productsApi = api.injectEndpoints({
               { type: 'Products', id: 'LIST' },
             ]
           : [{ type: 'Products', id: 'LIST' }],
-      keepUnusedDataFor: 30,
+      keepUnusedDataFor: 120,
     }),
     getPublicProductById: builder.query({
       query: (id) => `/catalog/products/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Products', id }],
+      keepUnusedDataFor: 120,
     }),
     getFeaturedProducts: builder.query({
       query: () => '/catalog/products/featured',
       providesTags: [{ type: 'Products', id: 'FEATURED' }],
-      keepUnusedDataFor: 30,
+      keepUnusedDataFor: 120,
     }),
     getAdminProducts: builder.query({
       query: () => '/admin/catalog/products',

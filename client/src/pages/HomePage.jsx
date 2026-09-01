@@ -13,8 +13,7 @@ export default function HomePage() {
       <Hero />
       <FestivalSaleSection />
       <WhyChooseUs />
-      <FeaturedProductsSection section="trending" />
-      <FeaturedProductsSection section="subsidy" />
+      <FeaturedProductsSection section="all" />
       <ProductShowcase />
       <FeatureSection />
       <InstallationGallerySection />

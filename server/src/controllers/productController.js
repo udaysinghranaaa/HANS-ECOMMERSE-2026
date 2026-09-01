@@ -1,5 +1,6 @@
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
+import { setPublicJsonCache } from '../utils/publicCache.js';
 import { normalizeStoredMediaUrl } from '../utils/mediaUrl.js';
 import {
   createProduct,
@@ -87,6 +88,7 @@ export const getPublicProductsHandler = catchAsync(async (req, res) => {
     categorySlug: req.query.category,
   });
 
+  setPublicJsonCache(res, 30);
   res.status(200).json({
     success: true,
     data: { products },
@@ -96,6 +98,7 @@ export const getPublicProductsHandler = catchAsync(async (req, res) => {
 export const getFeaturedProductsHandler = catchAsync(async (_req, res) => {
   const data = await getFeaturedProducts();
 
+  setPublicJsonCache(res, 30);
   res.status(200).json({
     success: true,
     data,
@@ -105,6 +108,7 @@ export const getFeaturedProductsHandler = catchAsync(async (_req, res) => {
 export const getPublicProductByIdHandler = catchAsync(async (req, res) => {
   const data = await getPublicProductById(req.params.id);
 
+  setPublicJsonCache(res, 30);
   res.status(200).json({
     success: true,
     data,

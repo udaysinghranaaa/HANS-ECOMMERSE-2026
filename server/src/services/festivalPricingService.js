@@ -1,15 +1,20 @@
 import prisma from '../config/prisma.js';
+import { getMemoryCached } from '../utils/memoryCache.js';
+
+const ACTIVE_FESTIVAL_CACHE_MS = 60_000;
 
 export const findActiveFestival = async () => {
-  const now = new Date();
+  return getMemoryCached('active-festival', ACTIVE_FESTIVAL_CACHE_MS, async () => {
+    const now = new Date();
 
-  return prisma.festival.findFirst({
-    where: {
-      isEnabled: true,
-      startsAt: { lte: now },
-      endsAt: { gte: now },
-    },
-    orderBy: [{ priority: 'desc' }, { startsAt: 'desc' }],
+    return prisma.festival.findFirst({
+      where: {
+        isEnabled: true,
+        startsAt: { lte: now },
+        endsAt: { gte: now },
+      },
+      orderBy: [{ priority: 'desc' }, { startsAt: 'desc' }],
+    });
   });
 };
 

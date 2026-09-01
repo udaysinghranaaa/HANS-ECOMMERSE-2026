@@ -1,5 +1,6 @@
 import catchAsync from '../utils/catchAsync.js';
 import ApiError from '../utils/ApiError.js';
+import { setPublicJsonCache } from '../utils/publicCache.js';
 import {
   deleteHomepageBannerByPosition,
   getAdminHomepageBanners,
@@ -21,6 +22,7 @@ const parsePosition = (value) => {
 export const getPublicHomepageBannersHandler = catchAsync(async (_req, res) => {
   const banners = await getPublicHomepageBanners();
 
+  setPublicJsonCache(res, 120);
   res.status(200).json({
     success: true,
     data: { banners },

@@ -47,9 +47,7 @@ const useCarousel = (itemCount) => {
 
 export default function ProductShowcase() {
   const { ref: sectionRef, isVisible: sectionVisible } = useRevealOnScroll();
-  const { data, isLoading, isError } = useGetPublicCategoriesQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, isLoading, isError } = useGetPublicCategoriesQuery();
 
   const categories = data?.data?.categories ?? [];
   const useCarouselLayout = categories.length > 3;
