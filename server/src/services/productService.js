@@ -282,21 +282,65 @@ export const getPublicProductById = async (id) => {
     throw new ApiError(404, 'Product not found');
   }
 
-  const relatedProducts = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      categoryId: product.categoryId,
-      NOT: { id: product.id },
-    },
-    include: productInclude,
-    orderBy: { createdAt: 'desc' },
-    take: 4,
-  });
+  const relatedProducts = await findRelatedProducts(product, id);
 
   return {
     product: formatPublicProduct(product, activeFestival),
     relatedProducts: formatPublicProducts(relatedProducts, activeFestival),
   };
+};
+
+const RELATED_PRODUCTS_LIMIT = 4;
+
+const findRelatedProducts = async (product, excludeId) => {
+  const selected = [];
+  const excludedIds = new Set([excludeId]);
+
+  const appendProducts = (products) => {
+    for (const item of products) {
+      if (selected.length >= RELATED_PRODUCTS_LIMIT) {
+        break;
+      }
+
+      if (excludedIds.has(item.id)) {
+        continue;
+      }
+
+      selected.push(item);
+      excludedIds.add(item.id);
+    }
+  };
+
+  if (product.categoryId) {
+    const categoryProducts = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        categoryId: product.categoryId,
+        id: { not: excludeId },
+      },
+      include: productInclude,
+      orderBy: [{ isTrending: 'desc' }, { updatedAt: 'desc' }],
+      take: RELATED_PRODUCTS_LIMIT,
+    });
+
+    appendProducts(categoryProducts);
+  }
+
+  if (selected.length < RELATED_PRODUCTS_LIMIT) {
+    const supplementalProducts = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        id: { notIn: [...excludedIds] },
+      },
+      include: productInclude,
+      orderBy: [{ isTrending: 'desc' }, { updatedAt: 'desc' }],
+      take: RELATED_PRODUCTS_LIMIT - selected.length,
+    });
+
+    appendProducts(supplementalProducts);
+  }
+
+  return selected;
 };
 
 export const getAdminProductById = async (id) => {

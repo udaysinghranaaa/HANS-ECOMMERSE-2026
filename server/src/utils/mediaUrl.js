@@ -1,9 +1,11 @@
 import { v2 as cloudinary } from 'cloudinary';
 import config from '../config/index.js';
 import {
+  getCloudinaryResourceTypeFromUrl,
   isCloudinaryConfigured,
   isCloudinaryUrl,
   optimizeCloudinaryUrl,
+  parseCloudinaryPublicIdFromUrl,
 } from './cloudinary.js';
 
 export const toAbsoluteMediaUrl = (
@@ -42,10 +44,10 @@ export const normalizeStoredMediaUrl = (url) => {
     const cleanUrl = url.split('?')[0];
 
     if (isCloudinaryConfigured()) {
-      const publicId = cloudinary.utils.public_id_from_url(cleanUrl);
+      const publicId = parseCloudinaryPublicIdFromUrl(cleanUrl);
 
       if (publicId) {
-        const resourceType = cleanUrl.includes('/video/upload/') ? 'video' : 'image';
+        const resourceType = getCloudinaryResourceTypeFromUrl(cleanUrl);
         return cloudinary.url(publicId, {
           secure: true,
           resource_type: resourceType,

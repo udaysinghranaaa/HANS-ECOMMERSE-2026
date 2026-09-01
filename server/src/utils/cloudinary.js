@@ -4,6 +4,87 @@ import config from '../config/index.js';
 export const isCloudinaryUrl = (url) =>
   typeof url === 'string' && url.includes('res.cloudinary.com');
 
+const isCloudinaryTransformationSegment = (segment) => {
+  if (!segment) {
+    return false;
+  }
+
+  if (segment.includes(',')) {
+    return true;
+  }
+
+  if (/^s--[^/]+--$/.test(segment)) {
+    return true;
+  }
+
+  if (/^t_[^/]+$/.test(segment)) {
+    return true;
+  }
+
+  return /^[a-z0-9]{1,3}_[^/]+$/i.test(segment);
+};
+
+export const parseCloudinaryPublicIdFromUrl = (url) => {
+  if (!isCloudinaryUrl(url)) {
+    return null;
+  }
+
+  try {
+    const pathname = new URL(url.split('?')[0]).pathname;
+    const uploadMarker = '/upload/';
+    const uploadIndex = pathname.indexOf(uploadMarker);
+
+    if (uploadIndex === -1) {
+      return null;
+    }
+
+    const segments = pathname
+      .slice(uploadIndex + uploadMarker.length)
+      .split('/')
+      .filter(Boolean);
+
+    while (segments.length > 0) {
+      const segment = segments[0];
+
+      if (/^v\d+$/.test(segment)) {
+        segments.shift();
+        continue;
+      }
+
+      if (isCloudinaryTransformationSegment(segment)) {
+        segments.shift();
+        continue;
+      }
+
+      break;
+    }
+
+    if (segments.length === 0) {
+      return null;
+    }
+
+    return segments.join('/').replace(/\.[^/.]+$/, '');
+  } catch {
+    return null;
+  }
+};
+
+export const getCloudinaryResourceTypeFromUrl = (url) => {
+  if (!isCloudinaryUrl(url)) {
+    return 'image';
+  }
+
+  if (url.includes('/video/upload/')) {
+    return 'video';
+  }
+
+  if (url.includes('/raw/upload/')) {
+    return 'raw';
+  }
+
+  return 'image';
+};
+
 export const isCloudinaryConfigured = () =>
   Boolean(
     config.cloudinary.cloudName &&
@@ -177,13 +258,16 @@ export const deleteCloudinaryResource = async (url, resourceType = 'image') => {
     return;
   }
 
-  const publicId = cloudinary.utils.public_id_from_url(url);
+  const publicId = parseCloudinaryPublicIdFromUrl(url);
 
   if (!publicId) {
     return;
   }
 
-  await deleteCloudinaryResourceByPublicId(publicId, resourceType);
+  const resolvedResourceType =
+    resourceType || getCloudinaryResourceTypeFromUrl(url);
+
+  await deleteCloudinaryResourceByPublicId(publicId, resolvedResourceType);
 };
 
 export const optimizeCloudinaryUrl = (url, { width, height, crop = 'limit' } = {}) => {

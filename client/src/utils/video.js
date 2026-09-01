@@ -41,14 +41,33 @@ export const parseYouTubeVideoId = (value) => {
 
 export const isYouTubeVideoUrl = (url) => Boolean(parseYouTubeVideoId(url));
 
-export const getYouTubeEmbedUrl = (url) => {
+export const getYouTubeEmbedUrl = (url, { autoplay = false } = {}) => {
   const videoId = parseYouTubeVideoId(url);
 
   if (!videoId) {
     return null;
   }
 
-  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+  const params = new URLSearchParams({
+    rel: '0',
+    modestbranding: '1',
+  });
+
+  if (autoplay) {
+    params.set('autoplay', '1');
+  }
+
+  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+};
+
+export const getYouTubeThumbnailUrl = (url, quality = 'maxresdefault') => {
+  const videoId = parseYouTubeVideoId(url);
+
+  if (!videoId) {
+    return null;
+  }
+
+  return `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`;
 };
 
 export const getYouTubeWatchUrl = (url) => {

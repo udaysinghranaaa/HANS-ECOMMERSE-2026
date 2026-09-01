@@ -15,6 +15,8 @@ export default function ProductCard({
   inFestivalSection = false,
   onViewDetails,
   variant = 'default',
+  showKeySpecs = false,
+  maxKeySpecs = 3,
 }) {
   const { openEnquiryModal } = useEnquiryModal();
   const imageUrl = product.images?.[0] || '';
@@ -32,6 +34,11 @@ export default function ProductCard({
           festivalName: product.activeFestival?.name,
         }
       : null);
+
+  const keySpecs =
+    showKeySpecs && product.specifications
+      ? Object.entries(product.specifications).slice(0, maxKeySpecs)
+      : [];
 
   const cardClassName = isShop
     ? 'group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-solar-200 hover:shadow-lg hover:shadow-solar-600/10'
@@ -107,6 +114,22 @@ export default function ProductCard({
         >
           <Link to={`/shop/product/${product.id}`}>{product.name}</Link>
         </h3>
+
+        {keySpecs.length > 0 && (
+          <ul className="mt-3 space-y-1.5 border-t border-gray-100 pt-3">
+            {keySpecs.map(([key, value]) => (
+              <li
+                key={key}
+                className="flex items-start justify-between gap-2 text-[11px] leading-snug sm:text-xs"
+              >
+                <span className="shrink-0 font-medium text-charcoal">{key}</span>
+                <span className="truncate text-right text-charcoal-light">
+                  {String(value)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-1">
           <span

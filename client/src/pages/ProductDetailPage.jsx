@@ -1,32 +1,96 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   CheckCircle2,
   Loader2,
-  PlayCircle,
   Shield,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import ProductCard from '@/components/shop/ProductCard';
+import RelatedProductsSection from '@/components/shop/RelatedProductsSection';
 import { ProductDetailBadges } from '@/components/shop/ProductBadges';
-import ProductVideo from '@/components/shop/ProductVideo';
+import { ProductVideosSection } from '@/components/shop/ProductVideo';
 import { useEnquiryModal } from '@/context/EnquiryModalContext';
-import { useGetPublicProductByIdQuery } from '@/services/productsApi';
+import {
+  useGetPublicProductByIdQuery,
+  useGetPublicProductsQuery,
+} from '@/services/productsApi';
 import { formatCurrency, getAmountSaved, getEffectiveProductPricing } from '@/utils/format';
+import { pickRelatedProducts } from '@/utils/relatedProducts';
+
+function ProductDetailMediaGallery({ product, images }) {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const activeImage = images[activeImageIndex] || images[0];
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="aspect-square bg-gray-100">
+        {activeImage ? (
+          <img
+            src={activeImage}
+            alt={product.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-gray-400">
+            No image available
+          </div>
+        )}
+      </div>
+
+      {images.length > 1 && (
+        <div className="grid grid-cols-5 gap-2 border-t border-gray-100 p-3">
+          {images.map((image, index) => (
+            <button
+              key={image}
+              type="button"
+              onClick={() => setActiveImageIndex(index)}
+              className={`aspect-square overflow-hidden rounded-lg border-2 transition ${
+                activeImageIndex === index
+                  ? 'border-solar-600 ring-2 ring-solar-100'
+                  : 'border-transparent hover:border-gray-200'
+              }`}
+            >
+              <img
+                src={image}
+                alt={`${product.name} view ${index + 1}`}
+                className="h-full w-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { openEnquiryModal } = useEnquiryModal();
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { data, isLoading, isError } = useGetPublicProductByIdQuery(id);
+  const { data: catalogData } = useGetPublicProductsQuery();
 
   const product = data?.data?.product;
-  const relatedProducts = data?.data?.relatedProducts ?? [];
+
+  const recommendations = useMemo(() => {
+    if (!product) {
+      return [];
+    }
+
+    const relatedFromApi = data?.data?.relatedProducts ?? [];
+    const catalog = catalogData?.data?.products ?? [];
+
+    if (relatedFromApi.length > 0) {
+      return relatedFromApi.filter((item) => item.id !== product.id);
+    }
+
+    return pickRelatedProducts(catalog, product);
+  }, [data, catalogData, product]);
   const images = product?.images ?? [];
   const specifications = product?.specifications
     ? Object.entries(product.specifications)
     : [];
+  const videoPoster = images[0] || '';
 
   if (isLoading) {
     return (
@@ -50,7 +114,6 @@ export default function ProductDetailPage() {
     );
   }
 
-  const activeImage = images[activeImageIndex] || images[0];
   const pricing = getEffectiveProductPricing(product);
   const amountSaved = getAmountSaved(pricing);
 
@@ -69,65 +132,13 @@ export default function ProductDetailPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-          <div>
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-              <div className="aspect-square bg-gray-100">
-                {activeImage ? (
-                  <img
-                    src={activeImage}
-                    alt={product.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-gray-400">
-                    No image available
-                  </div>
-                )}
-              </div>
-
-              {images.length > 1 && (
-                <div className="grid grid-cols-5 gap-2 border-t border-gray-100 p-3">
-                  {images.map((image, index) => (
-                    <button
-                      key={image}
-                      type="button"
-                      onClick={() => setActiveImageIndex(index)}
-                      className={`aspect-square overflow-hidden rounded-lg border-2 transition ${
-                        activeImageIndex === index
-                          ? 'border-solar-600 ring-2 ring-solar-100'
-                          : 'border-transparent hover:border-gray-200'
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`${product.name} view ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {product.videoUrl && (
-              <div className="mt-6">
-                <div className="mb-3 flex items-center gap-2 px-1">
-                  <PlayCircle className="h-5 w-5 text-solar-600" />
-                  <h2 className="text-sm font-semibold text-charcoal">
-                    Product Video
-                  </h2>
-                </div>
-                <ProductVideo
-                  videoUrl={product.videoUrl}
-                  poster={activeImage}
-                  title={`${product.name} video`}
-                />
-              </div>
-            )}
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-14">
+          <div className="space-y-6 lg:sticky lg:top-24 lg:z-10 lg:self-start">
+            <ProductDetailMediaGallery key={product.id} product={product} images={images} />
+            <ProductVideosSection product={product} poster={videoPoster} />
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-semibold uppercase tracking-wide text-solar-600">
               {product.category?.name}
             </p>
@@ -238,35 +249,13 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
-
-        {relatedProducts.length > 0 && (
-          <section className="mt-16 border-t border-gray-200 pt-12">
-            <div className="mb-8 flex items-end justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-charcoal">
-                  Related Products
-                </h2>
-                <p className="mt-2 text-sm text-charcoal-light">
-                  More products from {product.category?.name}
-                </p>
-              </div>
-              {product.category?.slug && (
-                <Link
-                  to={`/shop/${product.category.slug}`}
-                  className="hidden text-sm font-semibold text-solar-700 hover:text-solar-800 sm:inline"
-                >
-                  View all
-                </Link>
-              )}
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
+      <RelatedProductsSection
+        products={recommendations}
+        categoryName={product.category?.name}
+        categorySlug={product.category?.slug}
+      />
     </div>
   );
 }
