@@ -18,6 +18,7 @@ import {
 } from '@/services/homepageBannerApi';
 import { useGetAdminCategoriesQuery } from '@/services/categoriesApi';
 import { useGetAdminProductsQuery } from '@/services/productsApi';
+import { getBannerCtaLabel, getBannerLinkPreview } from '@/utils/bannerLink';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -26,6 +27,7 @@ const LINK_TYPES = [
   { value: 'none', label: 'No Link' },
   { value: 'category', label: 'Category' },
   { value: 'product', label: 'Product' },
+  { value: 'url', label: 'Custom Link' },
 ];
 
 const validateBannerFile = (file) => {
@@ -43,8 +45,10 @@ const validateBannerFile = (file) => {
 function BannerLinkFields({
   linkType,
   linkTargetId,
+  linkUrl,
   onLinkTypeChange,
   onLinkTargetChange,
+  onLinkUrlChange,
   categories,
   products,
   disabled = false,
@@ -115,6 +119,43 @@ function BannerLinkFields({
           </select>
         </div>
       )}
+
+      {linkType === 'url' && (
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Custom Link URL
+          </label>
+          <input
+            type="url"
+            value={linkUrl}
+            disabled={disabled}
+            onChange={(event) => onLinkUrlChange(event.target.value)}
+            placeholder="https://example.com or /contact"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-solar-400 focus:ring-2 focus:ring-solar-100 disabled:opacity-60"
+          />
+        </div>
+      )}
+
+      {linkType !== 'none' && (linkTargetId || linkUrl) ? (
+        <div className="rounded-lg border border-solar-100 bg-white px-3 py-2.5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Website preview
+          </p>
+          <p className="mt-1 text-sm font-semibold text-solar-800">
+            CTA: {getBannerCtaLabel({ linkType })}
+          </p>
+          <p className="mt-0.5 break-all text-xs text-slate-600">
+            Opens:{' '}
+            {getBannerLinkPreview({
+              linkType,
+              linkTargetId,
+              linkUrl,
+              categories,
+              products,
+            }) || 'Selected destination'}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -138,11 +179,13 @@ function BannerSlotCard({
   const [isDragging, setIsDragging] = useState(false);
   const [linkType, setLinkType] = useState(banner?.linkType || 'none');
   const [linkTargetId, setLinkTargetId] = useState(banner?.linkTargetId || '');
+  const [linkUrl, setLinkUrl] = useState(banner?.linkUrl || '');
 
   useEffect(() => {
     setLinkType(banner?.linkType || 'none');
     setLinkTargetId(banner?.linkTargetId || '');
-  }, [banner?.linkType, banner?.linkTargetId, banner?.updatedAt]);
+    setLinkUrl(banner?.linkUrl || '');
+  }, [banner?.linkType, banner?.linkTargetId, banner?.linkUrl, banner?.updatedAt]);
 
   useEffect(() => {
     return () => {
@@ -179,13 +222,28 @@ function BannerSlotCard({
 
   const appendLinkFields = (formData) => {
     formData.append('linkType', linkType);
-    if (linkType !== 'none' && linkTargetId) {
+    if (linkType === 'url' && linkUrl) {
+      formData.append('linkUrl', linkUrl);
+    } else if (linkType !== 'none' && linkTargetId) {
       formData.append('linkTargetId', linkTargetId);
     }
   };
 
   const validateLinkSelection = () => {
-    if (linkType !== 'none' && !linkTargetId) {
+    if (linkType === 'none') {
+      return true;
+    }
+
+    if (linkType === 'url') {
+      if (!linkUrl.trim()) {
+        setLocalError('Please enter a custom banner link URL.');
+        return false;
+      }
+
+      return true;
+    }
+
+    if (!linkTargetId) {
       setLocalError('Please select a category or product for the banner link.');
       return false;
     }
@@ -232,7 +290,8 @@ function BannerSlotCard({
     try {
       await onUpdateLink(position, {
         linkType,
-        linkTargetId: linkType === 'none' ? null : linkTargetId,
+        linkTargetId: linkType === 'none' || linkType === 'url' ? null : linkTargetId,
+        linkUrl: linkType === 'url' ? linkUrl.trim() : null,
       });
     } catch (error) {
       setLocalError(error?.data?.message || 'Failed to update banner link.');
@@ -292,13 +351,19 @@ function BannerSlotCard({
       <BannerLinkFields
         linkType={linkType}
         linkTargetId={linkTargetId}
+        linkUrl={linkUrl}
         onLinkTypeChange={(value) => {
           setLinkType(value);
           setLinkTargetId('');
+          setLinkUrl('');
           setLocalError('');
         }}
         onLinkTargetChange={(value) => {
           setLinkTargetId(value);
+          setLocalError('');
+        }}
+        onLinkUrlChange={(value) => {
+          setLinkUrl(value);
           setLocalError('');
         }}
         categories={categories}
