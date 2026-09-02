@@ -16,21 +16,27 @@ const bannerNavSelector = '[data-banner-nav]';
 
 function BannerCta({ label }) {
   return (
-    <span className="pointer-events-none inline-flex min-h-[44px] max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-white/30 bg-white/95 px-4 py-2.5 text-sm font-semibold text-charcoal shadow-[0_8px_24px_rgba(15,23,42,0.18)] backdrop-blur-sm transition-all duration-300 group-hover:bg-white group-hover:shadow-[0_10px_28px_rgba(15,23,42,0.22)] group-focus-visible:ring-2 group-focus-visible:ring-solar-400 group-focus-visible:ring-offset-2 group-active:scale-[0.98] sm:px-5 sm:text-[15px]">
-      <span className="truncate">{label}</span>
-      <ArrowRight className="h-4 w-4 shrink-0 text-solar-700" aria-hidden="true" />
+    <span
+      data-banner-cta
+      className="pointer-events-none inline-flex min-h-[44px] max-w-[min(calc(100vw-2.5rem),280px)] items-center justify-center gap-2 rounded-full border border-white/40 bg-solar-600 px-4 py-2.5 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(0,0,0,0.35),0_4px_12px_rgba(22,101,52,0.5)] ring-2 ring-white/30 transition-all duration-300 group-hover:bg-solar-700 group-hover:shadow-[0_10px_28px_rgba(0,0,0,0.4),0_6px_16px_rgba(22,101,52,0.55)] group-focus-visible:ring-white group-active:scale-[0.98] sm:min-h-[46px] sm:max-w-none sm:px-5 sm:text-[15px]"
+    >
+      <span className="truncate drop-shadow-sm">{label}</span>
+      <ArrowRight className="h-4 w-4 shrink-0 drop-shadow-sm" aria-hidden="true" />
     </span>
   );
 }
 
 function BannerSlideContent({ banner, hasMultipleSlides }) {
   const ctaLabel = getBannerCtaLabel(banner);
-  const ctaBottomClass = hasMultipleSlides
-    ? 'bottom-14 sm:bottom-16 md:bottom-[4.75rem]'
-    : 'bottom-5 sm:bottom-6 md:bottom-8';
+  const ctaPositionClass = hasMultipleSlides
+    ? 'bottom-[3.35rem] sm:bottom-[3.75rem] md:bottom-20'
+    : 'bottom-4 sm:bottom-5 md:bottom-6';
+  const ctaLeftClass = hasMultipleSlides
+    ? 'left-14 sm:left-5 lg:left-8'
+    : 'left-3 sm:left-5 lg:left-8';
 
   return (
-    <>
+    <div className="relative h-full w-full overflow-hidden">
       <img
         src={banner.imageUrl}
         alt={banner.title || `Banner ${banner.position}`}
@@ -40,16 +46,20 @@ function BannerSlideContent({ banner, hasMultipleSlides }) {
         fetchPriority={banner.position === 1 ? 'high' : 'auto'}
         draggable={false}
       />
+
       <span
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/45 via-slate-900/5 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%] bg-gradient-to-t from-slate-950/80 via-slate-900/35 to-transparent sm:h-[42%]"
         aria-hidden="true"
       />
-      <span
-        className={`pointer-events-none absolute left-4 z-[2] ${ctaBottomClass} sm:left-6 lg:left-8`}
+
+      <div
+        className={`pointer-events-none absolute ${ctaPositionClass} ${ctaLeftClass} z-[30]`}
       >
-        <BannerCta label={ctaLabel} />
-      </span>
-    </>
+        <span className="inline-flex rounded-full bg-slate-950/30 p-0.5 shadow-lg backdrop-blur-[3px]">
+          <BannerCta label={ctaLabel} />
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -72,7 +82,7 @@ function BannerSlide({ banner, categorySlugById, hasMultipleSlides }) {
 
   const label = `${getBannerCtaLabel(banner)} — ${banner.title || `Banner ${banner.position}`}`;
   const sharedClassName =
-    'group relative z-[1] block h-full w-full cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-solar-400';
+    'group relative isolate block h-full w-full cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-solar-400';
 
   if (isExternalHref(href)) {
     return (
@@ -229,7 +239,7 @@ export default function BannerCarousel() {
       aria-label="Homepage banner carousel"
     >
       <div
-        className="flex transition-transform duration-700 ease-in-out"
+        className="relative z-[1] flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${safeIndex * 100}%)` }}
       >
         {banners.map((banner) => (
@@ -246,15 +256,13 @@ export default function BannerCarousel() {
         ))}
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-28 bg-gradient-to-t from-slate-900/35 to-transparent" />
-
       {hasMultipleSlides && (
         <>
           <button
             type="button"
             aria-label="Previous banner"
             onClick={goPrev}
-            className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white md:left-5 md:h-11 md:w-11 lg:opacity-0 lg:group-hover:opacity-100"
+            className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white md:left-5 md:h-11 md:w-11 lg:opacity-0 lg:group-hover:opacity-100"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -263,26 +271,28 @@ export default function BannerCarousel() {
             type="button"
             aria-label="Next banner"
             onClick={goNext}
-            className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white md:right-5 md:h-11 md:w-11 lg:opacity-0 lg:group-hover:opacity-100"
+            className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white md:right-5 md:h-11 md:w-11 lg:opacity-0 lg:group-hover:opacity-100"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2 rounded-full bg-slate-900/35 px-3 py-2 backdrop-blur-sm sm:bottom-5">
-            {banners.map((banner, index) => (
-              <button
-                key={banner.id}
-                type="button"
-                aria-label={`Go to banner ${index + 1}`}
-                aria-current={index === safeIndex ? 'true' : undefined}
-                onClick={() => goToSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === safeIndex
-                    ? 'w-7 bg-solar-500'
-                    : 'w-2 bg-white/70 hover:bg-white'
-                }`}
-              />
-            ))}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center pb-3 sm:pb-4">
+            <div className="pointer-events-auto flex gap-2 rounded-full bg-slate-900/40 px-3 py-2 backdrop-blur-sm">
+              {banners.map((banner, index) => (
+                <button
+                  key={banner.id}
+                  type="button"
+                  aria-label={`Go to banner ${index + 1}`}
+                  aria-current={index === safeIndex ? 'true' : undefined}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === safeIndex
+                      ? 'w-7 bg-solar-500'
+                      : 'w-2 bg-white/70 hover:bg-white'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </>
       )}
