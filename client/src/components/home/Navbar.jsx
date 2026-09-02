@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
+  ArrowRight,
   ChevronDown,
+  Grid3X3,
   Home,
   Layers,
   Mail,
+  Menu,
   MessageCircle,
-  MoreVertical,
   Phone,
   Search,
   ShoppingBag,
@@ -29,10 +31,10 @@ const navLinkIcons = {
 
 const navLinkClass = ({ isActive }) =>
   [
-    'group relative inline-flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-all duration-200 lg:gap-2 lg:text-[15px]',
+    'group relative inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2.5 text-[15px] font-medium transition-all duration-200 lg:gap-2 lg:px-4 lg:py-3 lg:text-[16px]',
     isActive
       ? 'text-solar-700'
-      : 'text-slate-600 hover:text-solar-700',
+      : 'text-slate-600 hover:bg-slate-50/80 hover:text-solar-700',
   ].join(' ');
 
 function NavLinkIndicator({ isActive }) {
@@ -161,72 +163,10 @@ function NavDropdown({ label, items, mobile = false, onNavigate }) {
   );
 }
 
-function CategoriesNavDropdown({ mobile = false, onNavigate }) {
+function ProductsNavMegaMenu() {
   const [open, setOpen] = useState(false);
   const { data } = useGetPublicCategoriesQuery();
-
   const categories = data?.data?.categories ?? [];
-
-  const items = [
-    {
-      label: 'View All Categories',
-      path: '/shop',
-      description: 'Browse the complete solar product catalogue',
-    },
-    ...categories.map((category) => ({
-      label: category.name,
-      path: `/shop/${category.slug}`,
-      image: category.image,
-    })),
-  ];
-
-  if (mobile) {
-    return (
-      <div className="border-b border-slate-100/90">
-        <button
-          type="button"
-          className="flex min-h-[48px] w-full items-center justify-between py-3 text-left text-[15px] font-medium text-slate-800"
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          Categories
-          <ChevronDown
-            className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          />
-        </button>
-        <div
-          className={`overflow-hidden transition-all duration-300 ease-out ${
-            open ? 'max-h-[28rem] pb-3 opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div className="max-h-72 space-y-0.5 overflow-y-auto pl-3">
-            {items.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={onNavigate}
-                className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-solar-50"
-              >
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt=""
-                    className="h-9 w-9 rounded-lg object-cover ring-1 ring-slate-200/80"
-                  />
-                ) : (
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-solar-50 text-solar-700">
-                    <Layers className="h-4 w-4" />
-                  </span>
-                )}
-                <span className="text-sm font-medium text-slate-600 hover:text-solar-700">
-                  {item.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -234,64 +174,95 @@ function CategoriesNavDropdown({ mobile = false, onNavigate }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button
-        type="button"
-        className="group relative flex items-center gap-1 rounded-lg px-3 py-2.5 text-[14px] font-medium text-slate-600 transition-colors duration-200 hover:text-solar-700 lg:text-[15px]"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-      >
-        Categories
-        <ChevronDown
-          className={`h-3.5 w-3.5 text-slate-400 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:text-solar-600 ${open ? 'rotate-180' : ''}`}
-        />
-        <span
-          className={`absolute inset-x-2 bottom-0 h-[2px] origin-center rounded-full bg-solar-600 transition-all duration-300 ease-out ${
-            open
-              ? 'scale-x-100 opacity-100'
-              : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-70'
-          }`}
-          aria-hidden="true"
-        />
-      </button>
+      <NavLink to="/shop/categories" end className={navLinkClass}>
+        {({ isActive }) => (
+          <>
+            <Layers
+              className={`h-4 w-4 shrink-0 transition-all duration-200 ${
+                isActive
+                  ? 'text-solar-600'
+                  : 'text-slate-400 group-hover:-translate-y-0.5 group-hover:text-solar-600'
+              }`}
+              aria-hidden="true"
+            />
+            Products
+            <ChevronDown
+              className={`h-3.5 w-3.5 text-slate-400 transition-all duration-200 group-hover:text-solar-600 ${open ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+            <NavLinkIndicator isActive={isActive} />
+          </>
+        )}
+      </NavLink>
 
       <div
-        className={`absolute left-1/2 top-full z-50 w-[min(92vw,360px)] -translate-x-1/2 pt-2 transition-all duration-200 ease-out ${
+        className={`absolute right-0 top-full z-50 pt-2 transition-all duration-200 ease-out ${
           open
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none -translate-y-1 opacity-0'
         }`}
       >
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.1)]">
-          <div className="max-h-96 overflow-y-auto">
-            {items.map((item) => (
+        <div className="flex w-[min(92vw,680px)] max-h-[min(70vh,480px)] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.12)]">
+          <div className="shrink-0 border-b border-slate-100 bg-gradient-to-r from-solar-50/80 via-white to-emerald-50/40 px-4 py-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900">Product Categories</p>
+                <p className="text-xs text-slate-500">Browse our complete solar catalogue</p>
+              </div>
               <Link
-                key={item.path}
-                to={item.path}
-                className="flex items-center gap-3 border-b border-slate-50 px-4 py-3.5 transition-colors last:border-b-0 hover:bg-solar-50/80"
+                to="/shop/categories"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-solar-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-solar-700"
               >
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt=""
-                    className="h-11 w-11 shrink-0 rounded-lg object-cover ring-1 ring-slate-200/80"
-                  />
-                ) : (
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-solar-50 text-solar-700">
-                    <Layers className="h-5 w-5" />
-                  </span>
-                )}
+                View All Categories
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="panel-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-3">
+            <div className="grid grid-cols-3 gap-2">
+              <Link
+                to="/shop/categories"
+                className="group col-span-3 flex items-center gap-3 rounded-xl border border-solar-200 bg-gradient-to-r from-solar-50 to-emerald-50/60 p-3 transition-all duration-200 hover:border-solar-300 hover:shadow-md hover:shadow-solar-600/10 sm:col-span-1 sm:flex-col sm:items-start sm:p-3.5"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-solar-600 text-white shadow-sm transition group-hover:scale-105">
+                  <Grid3X3 className="h-5 w-5" />
+                </span>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-800">
-                    {item.label}
+                  <p className="text-sm font-semibold text-slate-900 group-hover:text-solar-800">
+                    All Categories
                   </p>
-                  {item.description && (
-                    <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
-                      {item.description}
-                    </p>
-                  )}
+                  <p className="mt-0.5 hidden text-xs text-slate-500 sm:block">
+                    View full catalogue
+                  </p>
                 </div>
               </Link>
-            ))}
+
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/shop/${category.slug}`}
+                  className="group overflow-hidden rounded-xl border border-slate-100 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-solar-200 hover:shadow-md hover:shadow-solar-600/10"
+                >
+                  <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt=""
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-solar-50 to-emerald-50">
+                        <Layers className="h-6 w-6 text-solar-600/50" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="truncate px-2.5 py-2 text-xs font-semibold text-slate-800 group-hover:text-solar-700">
+                    {category.name}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -302,7 +273,7 @@ function CategoriesNavDropdown({ mobile = false, onNavigate }) {
 function TopContactBar({ onBookSurvey }) {
   return (
     <div className="border-b border-slate-200/70 bg-slate-50/95">
-      <div className="mx-auto flex h-10 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-11 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-12 lg:px-8">
         <div className="flex min-w-0 items-center gap-3 text-xs font-medium text-slate-600">
           <a
             href={`tel:+91${contactInfo.phone}`}
@@ -356,7 +327,7 @@ function DesktopNavbar({
             : 'bg-gradient-to-b from-slate-50/80 to-white/50'
         }`}
       >
-        <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-4 sm:py-3 lg:px-6">
+        <div className="mx-auto max-w-7xl px-3 py-3 sm:px-4 lg:px-6">
           <div
             className={`rounded-2xl border bg-white transition-all duration-300 ease-out ${
               scrolled
@@ -364,13 +335,13 @@ function DesktopNavbar({
                 : 'border-slate-200/70 shadow-[0_8px_30px_rgba(15,23,42,0.06)]'
             }`}
           >
-            <div className="flex h-[3.75rem] items-center gap-3 px-3 sm:h-16 sm:gap-4 sm:px-5 lg:px-6">
+            <div className="flex h-[4.25rem] items-center gap-3 px-3 sm:h-[4.5rem] sm:gap-4 sm:px-5 lg:px-6">
               <Link to="/" className="flex shrink-0 items-center">
                 {!logoError ? (
                   <img
                     src={logoSrc}
                     alt="HANS Solar Energy"
-                    className="h-10 w-auto max-w-[140px] object-contain object-left sm:h-11 sm:max-w-[156px]"
+                    className="h-11 w-auto max-w-[156px] object-contain object-left sm:h-12 sm:max-w-[172px] lg:h-[3.25rem] lg:max-w-[188px]"
                     onError={() => setLogoError(true)}
                   />
                 ) : (
@@ -393,7 +364,7 @@ function DesktopNavbar({
                       )}
                     </NavLink>
                   ))}
-                  <CategoriesNavDropdown />
+                  <ProductsNavMegaMenu />
                   {navDropdowns.map((dropdown) => (
                     <NavDropdown key={dropdown.label} {...dropdown} />
                   ))}
@@ -486,13 +457,13 @@ function MobileNavbar({
             : 'border-slate-100'
         }`}
       >
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
+        <div className="mx-auto flex h-[3.75rem] max-w-7xl items-center gap-3 px-4">
           <Link to="/" className="flex min-w-0 shrink items-center">
             {!logoError ? (
               <img
                 src={logoSrc}
                 alt="HANS Solar Energy"
-                className="h-9 w-auto max-w-[128px] object-contain object-left"
+                className="h-10 w-auto max-w-[142px] object-contain object-left sm:max-w-[150px]"
                 onError={() => setLogoError(true)}
               />
             ) : (
@@ -507,7 +478,7 @@ function MobileNavbar({
               type="button"
               aria-label={searchOpen ? 'Close search' : 'Open search'}
               aria-expanded={searchOpen}
-              className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
+              className={`flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 ${
                 searchOpen
                   ? 'bg-solar-50 text-solar-700 ring-1 ring-solar-200'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-solar-700'
@@ -520,14 +491,14 @@ function MobileNavbar({
               type="button"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
-              className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
+              className={`flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 ${
                 menuOpen
                   ? 'bg-solar-50 text-solar-700 ring-1 ring-solar-200'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-solar-700'
               }`}
               onClick={() => (menuOpen ? closeMenu() : openMenu())}
             >
-              {menuOpen ? <X className="h-5 w-5" /> : <MoreVertical className="h-5 w-5" />}
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -617,7 +588,14 @@ function MobileNavbar({
               </Link>
             );
           })}
-          <CategoriesNavDropdown mobile onNavigate={closeMenu} />
+          <Link
+            to="/shop/categories"
+            onClick={closeMenu}
+            className="flex min-h-[48px] items-center gap-2.5 border-b border-slate-100 py-3 text-[15px] font-medium text-slate-800 transition-colors active:bg-solar-50"
+          >
+            <Layers className="h-4 w-4 text-solar-600" aria-hidden="true" />
+            Products
+          </Link>
           {navDropdowns.map((dropdown) => (
             <NavDropdown
               key={dropdown.label}

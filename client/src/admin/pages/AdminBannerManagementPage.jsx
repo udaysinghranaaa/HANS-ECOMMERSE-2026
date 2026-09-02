@@ -3,6 +3,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ImagePlus,
+  Link2,
   Loader2,
   Trash2,
   Upload,
@@ -12,12 +13,20 @@ import StatusBadge from '@/admin/components/ui/StatusBadge';
 import {
   useDeleteHomepageBannerMutation,
   useGetAdminHomepageBannersQuery,
+  useUpdateHomepageBannerMutation,
   useUploadHomepageBannerMutation,
 } from '@/services/homepageBannerApi';
+import { useGetAdminCategoriesQuery } from '@/services/categoriesApi';
+import { useGetAdminProductsQuery } from '@/services/productsApi';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const BANNER_SLOTS = [1, 2, 3, 4];
+const LINK_TYPES = [
+  { value: 'none', label: 'No Link' },
+  { value: 'category', label: 'Category' },
+  { value: 'product', label: 'Product' },
+];
 
 const validateBannerFile = (file) => {
   if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -31,12 +40,95 @@ const validateBannerFile = (file) => {
   return null;
 };
 
+function BannerLinkFields({
+  linkType,
+  linkTargetId,
+  onLinkTypeChange,
+  onLinkTargetChange,
+  categories,
+  products,
+  disabled = false,
+}) {
+  return (
+    <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+        <Link2 className="h-4 w-4 text-solar-600" />
+        Banner Link
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Link Type
+        </label>
+        <select
+          value={linkType}
+          disabled={disabled}
+          onChange={(event) => onLinkTypeChange(event.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-solar-400 focus:ring-2 focus:ring-solar-100 disabled:opacity-60"
+        >
+          {LINK_TYPES.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {linkType === 'category' && (
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Select Category
+          </label>
+          <select
+            value={linkTargetId}
+            disabled={disabled}
+            onChange={(event) => onLinkTargetChange(event.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-solar-400 focus:ring-2 focus:ring-solar-100 disabled:opacity-60"
+          >
+            <option value="">Choose a category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {linkType === 'product' && (
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Select Product
+          </label>
+          <select
+            value={linkTargetId}
+            disabled={disabled}
+            onChange={(event) => onLinkTargetChange(event.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-solar-400 focus:ring-2 focus:ring-solar-100 disabled:opacity-60"
+          >
+            <option value="">Choose a product</option>
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BannerSlotCard({
   position,
   banner,
+  categories,
+  products,
   onUpload,
+  onUpdateLink,
   onDelete,
   isUploading,
+  isUpdatingLink,
   isDeleting,
 }) {
   const fileInputRef = useRef(null);
@@ -44,6 +136,13 @@ function BannerSlotCard({
   const [selectedFile, setSelectedFile] = useState(null);
   const [localError, setLocalError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [linkType, setLinkType] = useState(banner?.linkType || 'none');
+  const [linkTargetId, setLinkTargetId] = useState(banner?.linkTargetId || '');
+
+  useEffect(() => {
+    setLinkType(banner?.linkType || 'none');
+    setLinkTargetId(banner?.linkTargetId || '');
+  }, [banner?.linkType, banner?.linkTargetId, banner?.updatedAt]);
 
   useEffect(() => {
     return () => {
@@ -78,9 +177,29 @@ function BannerSlotCard({
     setPreviewUrl(URL.createObjectURL(file));
   };
 
+  const appendLinkFields = (formData) => {
+    formData.append('linkType', linkType);
+    if (linkType !== 'none' && linkTargetId) {
+      formData.append('linkTargetId', linkTargetId);
+    }
+  };
+
+  const validateLinkSelection = () => {
+    if (linkType !== 'none' && !linkTargetId) {
+      setLocalError('Please select a category or product for the banner link.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handlePublish = async () => {
     if (!selectedFile) {
       fileInputRef.current?.click();
+      return;
+    }
+
+    if (!validateLinkSelection()) {
       return;
     }
 
@@ -89,12 +208,34 @@ function BannerSlotCard({
     const formData = new FormData();
     formData.append('image', selectedFile);
     formData.append('title', `Banner ${position}`);
+    appendLinkFields(formData);
 
     try {
       await onUpload(position, formData);
       clearPreview();
     } catch (error) {
       setLocalError(error?.data?.message || 'Failed to publish banner.');
+    }
+  };
+
+  const handleSaveLink = async () => {
+    if (!banner) {
+      return;
+    }
+
+    if (!validateLinkSelection()) {
+      return;
+    }
+
+    setLocalError('');
+
+    try {
+      await onUpdateLink(position, {
+        linkType,
+        linkTargetId: linkType === 'none' ? null : linkTargetId,
+      });
+    } catch (error) {
+      setLocalError(error?.data?.message || 'Failed to update banner link.');
     }
   };
 
@@ -148,6 +289,23 @@ function BannerSlotCard({
         )}
       </div>
 
+      <BannerLinkFields
+        linkType={linkType}
+        linkTargetId={linkTargetId}
+        onLinkTypeChange={(value) => {
+          setLinkType(value);
+          setLinkTargetId('');
+          setLocalError('');
+        }}
+        onLinkTargetChange={(value) => {
+          setLinkTargetId(value);
+          setLocalError('');
+        }}
+        categories={categories}
+        products={products}
+        disabled={isUploading || isUpdatingLink}
+      />
+
       {localError && (
         <p className="mt-3 text-sm text-red-600">{localError}</p>
       )}
@@ -165,7 +323,7 @@ function BannerSlotCard({
         }}
       />
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -192,15 +350,33 @@ function BannerSlotCard({
         </button>
 
         {banner && (
-          <button
-            type="button"
-            disabled={isDeleting}
-            onClick={() => onDelete(position)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
-          >
-            <Trash2 className="h-4 w-4" />
-            Remove
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={isUpdatingLink}
+              onClick={handleSaveLink}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-solar-200 bg-solar-50 px-4 py-2.5 text-sm font-semibold text-solar-800 hover:bg-solar-100 disabled:opacity-60"
+            >
+              {isUpdatingLink ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving link...
+                </>
+              ) : (
+                'Save Link Settings'
+              )}
+            </button>
+
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={() => onDelete(position)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+            >
+              <Trash2 className="h-4 w-4" />
+              Remove
+            </button>
+          </>
         )}
       </div>
     </article>
@@ -220,11 +396,18 @@ export default function AdminBannerManagementPage() {
   } = useGetAdminHomepageBannersQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
+  const { data: categoriesData } = useGetAdminCategoriesQuery();
+  const { data: productsData } = useGetAdminProductsQuery();
 
   const [uploadBanner] = useUploadHomepageBannerMutation();
+  const [updateBanner] = useUpdateHomepageBannerMutation();
   const [deleteBanner] = useDeleteHomepageBannerMutation();
   const [uploadingPosition, setUploadingPosition] = useState(null);
+  const [updatingLinkPosition, setUpdatingLinkPosition] = useState(null);
   const [deletingPosition, setDeletingPosition] = useState(null);
+
+  const categories = categoriesData?.data?.categories ?? [];
+  const products = productsData?.data?.products ?? [];
 
   const slots = data?.data?.slots ?? BANNER_SLOTS.map((position) => ({
     position,
@@ -246,6 +429,24 @@ export default function AdminBannerManagementPage() {
       throw uploadError;
     } finally {
       setUploadingPosition(null);
+    }
+  };
+
+  const handleUpdateLink = async (position, payload) => {
+    setGlobalError('');
+    setSuccessMessage('');
+    setUpdatingLinkPosition(position);
+
+    try {
+      await updateBanner({ position, ...payload }).unwrap();
+      setSuccessMessage(`Banner ${position} link updated successfully.`);
+    } catch (updateError) {
+      setGlobalError(
+        updateError?.data?.message || `Failed to update banner ${position} link.`,
+      );
+      throw updateError;
+    } finally {
+      setUpdatingLinkPosition(null);
     }
   };
 
@@ -294,7 +495,7 @@ export default function AdminBannerManagementPage() {
     <div className="space-y-6">
       <PageHeader
         title="Homepage Banner Management"
-        description="Manage four independent homepage banner slots. Updating one banner does not affect the others."
+        description="Manage four independent homepage banner slots. Optionally link each banner to a category or product."
       />
 
       {successMessage && (
@@ -317,9 +518,13 @@ export default function AdminBannerManagementPage() {
             key={position}
             position={position}
             banner={banner}
+            categories={categories}
+            products={products}
             onUpload={handleUpload}
+            onUpdateLink={handleUpdateLink}
             onDelete={handleDelete}
             isUploading={uploadingPosition === position}
+            isUpdatingLink={updatingLinkPosition === position}
             isDeleting={deletingPosition === position}
           />
         ))}

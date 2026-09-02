@@ -120,14 +120,16 @@ model Admin {
 }
 
 model HomepageBanner {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  position  Int      @unique
-  title     String
-  imageUrl  String
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  position      Int      @unique
+  title         String
+  imageUrl      String
   imagePublicId String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive      Boolean  @default(true)
+  linkType      String   @default("none")
+  linkTargetId  String?  @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([isActive])
 }

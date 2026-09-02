@@ -11,10 +11,14 @@ function AboutUsVideo({ isVisible }) {
 
   return (
     <div
-      className={`reveal-up relative ${isVisible ? 'is-visible' : ''}`}
-      style={{ animationDelay: '120ms' }}
+      className={`about-video-panel reveal-up relative ${isVisible ? 'is-visible' : ''}`}
+      style={{ animationDelay: '140ms' }}
     >
-      <div className="aspect-video w-full overflow-hidden rounded-2xl shadow-[0_24px_60px_rgba(15,23,42,0.14)] sm:rounded-3xl">
+      <p className="mb-3 text-sm font-medium text-charcoal-light sm:mb-4 sm:text-base">
+        Play this video to learn more about HANS Solar
+      </p>
+
+      <div className="aspect-video w-full overflow-hidden rounded-2xl shadow-[0_24px_60px_rgba(15,23,42,0.14)] sm:rounded-3xl lg:shadow-[0_28px_70px_rgba(15,23,42,0.16)]">
         {isPlaying ? (
           <iframe
             title={title}
@@ -34,7 +38,7 @@ function AboutUsVideo({ isVisible }) {
             <img
               src={thumbnailUrl}
               alt={title}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               loading="lazy"
               decoding="async"
               onError={(event) => {
@@ -42,16 +46,15 @@ function AboutUsVideo({ isVisible }) {
               }}
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/15 to-slate-900/10 transition-opacity duration-300 group-hover:from-slate-900/65" />
 
-            <span className="absolute inset-0 flex items-center justify-center">
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-solar-700 shadow-xl ring-4 ring-white/25 transition-all duration-300 group-hover:scale-105 group-hover:bg-white sm:h-[4.5rem] sm:w-[4.5rem]">
+            <span className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
+              <span className="about-play-btn flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-solar-700 shadow-xl ring-4 ring-white/30 transition-all duration-300 group-hover:scale-110 group-hover:bg-white sm:h-[4.5rem] sm:w-[4.5rem]">
                 <Play className="ml-1 h-7 w-7 fill-current sm:h-8 sm:w-8" />
               </span>
-            </span>
-
-            <span className="absolute bottom-4 left-4 rounded-full bg-slate-900/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm sm:text-sm">
-              Watch HANS Solar
+              <span className="rounded-full bg-slate-900/55 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm sm:text-sm">
+                Watch company overview
+              </span>
             </span>
           </button>
         )}
@@ -74,7 +77,10 @@ export default function WhyChooseUs() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-16">
-          <div className={`reveal-up ${isVisible ? 'is-visible' : ''}`}>
+          <div
+            className={`reveal-up ${isVisible ? 'is-visible' : ''}`}
+            style={{ animationDelay: '60ms' }}
+          >
             <div className="flex items-center gap-3">
               {!logoError ? (
                 <img

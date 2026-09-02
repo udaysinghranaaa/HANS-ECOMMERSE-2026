@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import AdminRoutes from '@/admin/routes/AdminRoutes';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HomePage from '@/pages/HomePage';
+import CategoriesPage from '@/pages/CategoriesPage';
 import ShopPage from '@/pages/ShopPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
 import ContactPage from '@/pages/ContactPage';
@@ -32,6 +33,7 @@ export default function AppRoutes() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/shop/product/:id" element={<ProductDetailPage />} />
+        <Route path="/shop/categories" element={<CategoriesPage />} />
         <Route path="/shop/:category" element={<ShopPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/contact" element={<ContactPage />} />

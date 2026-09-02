@@ -50,6 +50,8 @@ export const upsertAdminHomepageBanner = catchAsync(async (req, res) => {
     position,
     title,
     imageFile: req.file,
+    linkType: req.body.linkType,
+    linkTargetId: req.body.linkTargetId,
   });
 
   res.status(200).json({

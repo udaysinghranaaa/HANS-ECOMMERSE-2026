@@ -4,16 +4,96 @@ import { deleteBannerFile, persistUploadedImage } from '../utils/fileUpload.js';
 import { toAbsoluteMediaUrl } from '../utils/mediaUrl.js';
 
 export const BANNER_POSITIONS = [1, 2, 3, 4];
+const BANNER_LINK_TYPES = ['none', 'category', 'product'];
 
-const formatBanner = (banner) => ({
-  id: banner.id,
-  position: banner.position,
-  title: banner.title,
-  imageUrl: toAbsoluteMediaUrl(banner.imageUrl, banner.updatedAt, { width: 1920 }),
-  isActive: banner.isActive,
-  createdAt: banner.createdAt,
-  updatedAt: banner.updatedAt,
-});
+const normalizeLinkType = (value) => {
+  const linkType = (value || 'none').trim().toLowerCase();
+
+  if (!BANNER_LINK_TYPES.includes(linkType)) {
+    throw new ApiError(400, 'Invalid banner link type');
+  }
+
+  return linkType;
+};
+
+const validateLinkTarget = async (linkType, linkTargetId) => {
+  if (linkType === 'none') {
+    return null;
+  }
+
+  const targetId = linkTargetId?.trim();
+
+  if (!targetId) {
+    throw new ApiError(400, 'Please select a category or product for the banner link');
+  }
+
+  if (linkType === 'category') {
+    const category = await prisma.category.findUnique({ where: { id: targetId } });
+
+    if (!category) {
+      throw new ApiError(400, 'Selected category was not found');
+    }
+
+    return category.id;
+  }
+
+  const product = await prisma.product.findUnique({ where: { id: targetId } });
+
+  if (!product) {
+    throw new ApiError(400, 'Selected product was not found');
+  }
+
+  return product.id;
+};
+
+const buildCategorySlugMap = async (banners) => {
+  const categoryIds = banners
+    .filter((banner) => banner.linkType === 'category' && banner.linkTargetId)
+    .map((banner) => banner.linkTargetId);
+
+  if (categoryIds.length === 0) {
+    return new Map();
+  }
+
+  const categories = await prisma.category.findMany({
+    where: { id: { in: categoryIds } },
+    select: { id: true, slug: true },
+  });
+
+  return new Map(categories.map((category) => [category.id, category.slug]));
+};
+
+const formatBanner = (banner, categorySlugMap = new Map()) => {
+  const linkType = banner.linkType || 'none';
+  let linkHref = null;
+
+  if (linkType === 'category' && banner.linkTargetId) {
+    const slug = categorySlugMap.get(banner.linkTargetId);
+    if (slug) {
+      linkHref = `/shop/${slug}`;
+    }
+  } else if (linkType === 'product' && banner.linkTargetId) {
+    linkHref = `/shop/product/${banner.linkTargetId}`;
+  }
+
+  return {
+    id: banner.id,
+    position: banner.position,
+    title: banner.title,
+    imageUrl: toAbsoluteMediaUrl(banner.imageUrl, banner.updatedAt, { width: 1920 }),
+    isActive: banner.isActive,
+    linkType,
+    linkTargetId: banner.linkTargetId || null,
+    linkHref,
+    createdAt: banner.createdAt,
+    updatedAt: banner.updatedAt,
+  };
+};
+
+const enrichBanners = async (banners) => {
+  const categorySlugMap = await buildCategorySlugMap(banners);
+  return banners.map((banner) => formatBanner(banner, categorySlugMap));
+};
 
 export const getPublicHomepageBanners = async () => {
   const banners = await prisma.homepageBanner.findMany({
@@ -24,7 +104,7 @@ export const getPublicHomepageBanners = async () => {
     orderBy: { position: 'asc' },
   });
 
-  return banners.map(formatBanner);
+  return enrichBanners(banners);
 };
 
 export const getAdminHomepageBanners = async () => {
@@ -32,8 +112,9 @@ export const getAdminHomepageBanners = async () => {
     orderBy: { position: 'asc' },
   });
 
+  const formattedBanners = await enrichBanners(banners);
   const bannerByPosition = new Map(
-    banners.map((banner) => [banner.position, formatBanner(banner)]),
+    formattedBanners.map((banner) => [banner.position, banner]),
   );
 
   return BANNER_POSITIONS.map((position) => ({
@@ -42,10 +123,22 @@ export const getAdminHomepageBanners = async () => {
   }));
 };
 
-export const upsertHomepageBanner = async ({ position, title, imageFile }) => {
+export const upsertHomepageBanner = async ({
+  position,
+  title,
+  imageFile,
+  linkType,
+  linkTargetId,
+}) => {
   if (!BANNER_POSITIONS.includes(position)) {
     throw new ApiError(400, 'Banner position must be between 1 and 4');
   }
+
+  const normalizedLinkType = normalizeLinkType(linkType);
+  const normalizedLinkTargetId = await validateLinkTarget(
+    normalizedLinkType,
+    linkTargetId,
+  );
 
   const { url: imageUrl, publicId: imagePublicId } = await persistUploadedImage(
     imageFile,
@@ -65,10 +158,13 @@ export const upsertHomepageBanner = async ({ position, title, imageFile }) => {
         imageUrl,
         imagePublicId,
         isActive: true,
+        linkType: normalizedLinkType,
+        linkTargetId: normalizedLinkTargetId,
       },
     });
 
-    return formatBanner(banner);
+    const [formattedBanner] = await enrichBanners([banner]);
+    return formattedBanner;
   }
 
   const banner = await prisma.homepageBanner.create({
@@ -78,15 +174,18 @@ export const upsertHomepageBanner = async ({ position, title, imageFile }) => {
       imageUrl,
       imagePublicId,
       isActive: true,
+      linkType: normalizedLinkType,
+      linkTargetId: normalizedLinkTargetId,
     },
   });
 
-  return formatBanner(banner);
+  const [formattedBanner] = await enrichBanners([banner]);
+  return formattedBanner;
 };
 
 export const updateHomepageBannerByPosition = async (
   position,
-  { title, isActive },
+  { title, isActive, linkType, linkTargetId },
 ) => {
   if (!BANNER_POSITIONS.includes(position)) {
     throw new ApiError(400, 'Banner position must be between 1 and 4');
@@ -100,15 +199,37 @@ export const updateHomepageBannerByPosition = async (
     throw new ApiError(404, 'Banner slot is empty');
   }
 
+  const data = {};
+
+  if (title !== undefined) {
+    data.title = title;
+  }
+
+  if (isActive !== undefined) {
+    data.isActive = isActive;
+  }
+
+  if (linkType !== undefined) {
+    const normalizedLinkType = normalizeLinkType(linkType);
+    data.linkType = normalizedLinkType;
+    data.linkTargetId = await validateLinkTarget(
+      normalizedLinkType,
+      linkTargetId,
+    );
+  } else if (linkTargetId !== undefined && existingBanner.linkType !== 'none') {
+    data.linkTargetId = await validateLinkTarget(
+      existingBanner.linkType,
+      linkTargetId,
+    );
+  }
+
   const banner = await prisma.homepageBanner.update({
     where: { position },
-    data: {
-      ...(title !== undefined ? { title } : {}),
-      ...(isActive !== undefined ? { isActive } : {}),
-    },
+    data,
   });
 
-  return formatBanner(banner);
+  const [formattedBanner] = await enrichBanners([banner]);
+  return formattedBanner;
 };
 
 export const deleteHomepageBannerByPosition = async (position) => {

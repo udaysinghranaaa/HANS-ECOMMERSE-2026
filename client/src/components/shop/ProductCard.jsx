@@ -41,7 +41,7 @@ export default function ProductCard({
       : [];
 
   const cardClassName = isShop
-    ? 'group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-solar-200 hover:shadow-lg hover:shadow-solar-600/10'
+    ? 'group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-solar-200 hover:shadow-md hover:shadow-solar-600/10 active:scale-[0.99] sm:rounded-2xl sm:hover:-translate-y-1 sm:hover:shadow-lg'
     : `group flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
         inFestivalSection
           ? 'border-gray-200 text-charcoal'
@@ -94,11 +94,11 @@ export default function ProductCard({
         )}
       </Link>
 
-      <div className={`flex flex-1 flex-col ${isShop ? 'p-3 sm:p-5' : 'p-5'}`}>
+      <div className={`flex flex-1 flex-col ${isShop ? 'p-2.5 sm:p-4' : 'p-5'}`}>
         <p
           className={`font-semibold uppercase tracking-wide text-solar-600 ${
             isShop
-              ? 'text-[11px] tracking-[0.12em]'
+              ? 'text-[10px] tracking-[0.1em] sm:text-[11px] sm:tracking-[0.12em]'
               : 'text-xs font-medium'
           }`}
         >
@@ -106,9 +106,9 @@ export default function ProductCard({
         </p>
 
         <h3
-          className={`mt-1.5 line-clamp-2 font-bold text-charcoal transition-colors group-hover:text-solar-700 ${
+          className={`mt-1 line-clamp-2 font-bold text-charcoal transition-colors group-hover:text-solar-700 ${
             isShop
-              ? 'min-h-[2.75rem] text-base leading-snug sm:text-[1.05rem]'
+              ? 'min-h-[2.5rem] text-sm leading-snug sm:min-h-[2.75rem] sm:text-base'
               : 'text-lg font-semibold'
           }`}
         >
@@ -131,10 +131,10 @@ export default function ProductCard({
           </ul>
         )}
 
-        <div className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-1">
+        <div className="mt-2 flex flex-wrap items-end gap-x-1.5 gap-y-0.5 sm:mt-3 sm:gap-x-2 sm:gap-y-1">
           <span
             className={`font-bold tracking-tight ${
-              isShop ? 'text-xl text-solar-700 sm:text-2xl' : 'text-xl text-solar-700'
+              isShop ? 'text-lg text-solar-700 sm:text-xl lg:text-2xl' : 'text-xl text-solar-700'
             }`}
           >
             {formatCurrency(pricing.salePrice)}
@@ -158,20 +158,20 @@ export default function ProductCard({
         </div>
 
         {isShop ? (
-          <div className="mt-auto flex flex-col gap-2 pt-3 sm:pt-4">
+          <div className="mt-auto flex flex-col gap-1.5 pt-2.5 sm:gap-2 sm:pt-3">
             <Link
               to={`/shop/product/${product.id}`}
-              className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-solar-600 px-3 py-2.5 text-center text-xs font-semibold leading-snug text-white transition-all duration-200 hover:bg-solar-700 hover:shadow-md hover:shadow-solar-600/20 sm:text-sm"
+              className="inline-flex min-h-[40px] w-full items-center justify-center gap-1 rounded-lg bg-solar-600 px-2.5 py-2 text-center text-[11px] font-semibold leading-snug text-white transition-all duration-200 hover:bg-solar-700 sm:min-h-[44px] sm:rounded-xl sm:px-3 sm:text-xs"
             >
               <span className="whitespace-nowrap">View Details</span>
-              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden />
             </Link>
             <button
               type="button"
               onClick={handleEnquire}
-              className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl border border-solar-200 bg-solar-50 px-3 py-2.5 text-center text-xs font-semibold leading-snug text-solar-800 transition-all duration-200 hover:border-solar-300 hover:bg-solar-100 sm:text-sm"
+              className="inline-flex min-h-[40px] w-full items-center justify-center gap-1 rounded-lg border border-solar-200 bg-solar-50 px-2.5 py-2 text-center text-[11px] font-semibold leading-snug text-solar-800 transition-all duration-200 hover:border-solar-300 hover:bg-solar-100 sm:min-h-[44px] sm:rounded-xl sm:px-3 sm:text-xs"
             >
-              <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+              <MessageCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden />
               <span className="whitespace-nowrap">Enquire</span>
             </button>
           </div>
