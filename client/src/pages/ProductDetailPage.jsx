@@ -23,13 +23,13 @@ function ProductDetailMediaGallery({ product, images }) {
   const activeImage = images[activeImageIndex] || images[0];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm sm:rounded-2xl">
-      <div className="aspect-square max-h-[min(72vw,420px)] bg-gray-100 sm:max-h-none">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm sm:rounded-2xl lg:shadow-md">
+      <div className="aspect-square max-h-[min(72vw,420px)] bg-gray-100 sm:max-h-none lg:max-h-[min(56vh,520px)]">
         {activeImage ? (
           <img
             src={activeImage}
             alt={product.name}
-            className="h-full w-full object-contain sm:object-cover"
+            className="h-full w-full object-contain sm:object-cover lg:object-contain"
           />
         ) : (
           <div className="flex h-full min-h-[220px] items-center justify-center text-sm text-gray-400">
@@ -39,7 +39,7 @@ function ProductDetailMediaGallery({ product, images }) {
       </div>
 
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-2 border-t border-gray-100 p-2.5 sm:grid-cols-5 sm:p-3">
+        <div className="grid grid-cols-4 gap-2 border-t border-gray-100 p-2.5 sm:grid-cols-5 sm:p-3 lg:grid-cols-4 xl:grid-cols-5">
           {images.map((image, index) => (
             <button
               key={`${image}-${index}`}
@@ -125,7 +125,7 @@ export default function ProductDetailPage() {
   const amountSaved = getAmountSaved(pricing);
 
   return (
-    <div className="overflow-x-hidden bg-gray-50 pb-8 sm:pb-10">
+    <div className="bg-gray-50 pb-8 sm:pb-10">
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
           <Link
@@ -144,13 +144,22 @@ export default function ProductDetailPage() {
         id="product-detail"
         className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10"
       >
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-12">
-          <div className="min-w-0 space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:z-10 lg:self-start">
-            <ProductDetailMediaGallery key={product.id} product={product} images={images} />
+        <div
+          data-product-detail-layout
+          className="grid gap-6 lg:grid-cols-2 lg:gap-10 xl:gap-14"
+        >
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-6 lg:h-full">
+            <div
+              data-product-gallery-sticky
+              className="w-full lg:sticky lg:top-24 lg:z-10 lg:self-start"
+            >
+              <ProductDetailMediaGallery key={product.id} product={product} images={images} />
+            </div>
+
             <ProductVideosSection product={product} poster={videoPoster} />
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 lg:pt-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-solar-600 sm:text-sm">
               {product.category?.name}
             </p>

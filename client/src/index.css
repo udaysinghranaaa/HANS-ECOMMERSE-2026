@@ -305,3 +305,17 @@ a {
 .admin-login-logo {
   image-rendering: -webkit-optimize-contrast;
 }
+
+@media (min-width: 1024px) {
+  [data-product-detail-layout] {
+    align-items: stretch;
+  }
+
+  [data-product-gallery-sticky] {
+    position: sticky;
+    top: 6rem;
+    z-index: 10;
+    align-self: start;
+    width: 100%;
+  }
+}
