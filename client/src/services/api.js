@@ -18,15 +18,15 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-const isTotpVerificationExpired = (error) =>
+const isAdminSessionExpired = (error) =>
   error?.status === 401 &&
   typeof error?.data?.message === 'string' &&
-  error.data.message.includes('Two-factor verification expired');
+  error.data.message.includes('Admin session expired');
 
 const baseQueryWithAdminSessionHandling = async (args, api, extraOptions) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  if (isTotpVerificationExpired(result.error)) {
+  if (isAdminSessionExpired(result.error)) {
     api.dispatch(logout());
 
     if (

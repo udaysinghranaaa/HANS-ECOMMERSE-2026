@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
 
-export const TOTP_VERIFICATION_TTL_MS = 5 * 60 * 1000;
+export const ADMIN_SESSION_INACTIVITY_MS = 5 * 60 * 1000;
 
-export const isTotpVerificationFresh = (totpVerifiedAt) => {
-  if (!totpVerifiedAt) {
+export const isAdminSessionActive = (lastActivityAt) => {
+  if (!lastActivityAt) {
     return false;
   }
 
-  return Date.now() - totpVerifiedAt * 1000 <= TOTP_VERIFICATION_TTL_MS;
+  return Date.now() - lastActivityAt * 1000 <= ADMIN_SESSION_INACTIVITY_MS;
 };
 
 export const signAdminToken = (adminId) =>
@@ -18,10 +18,9 @@ export const signAdminToken = (adminId) =>
       role: 'admin',
       stage: 'authenticated',
       totpVerified: true,
-      totpVerifiedAt: Math.floor(Date.now() / 1000),
+      lastActivityAt: Math.floor(Date.now() / 1000),
     },
     config.jwt.secret,
-    { expiresIn: config.jwt.expiresIn },
   );
 
 export const signPendingTotpToken = (adminId) =>

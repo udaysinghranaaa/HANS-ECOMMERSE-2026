@@ -1,5 +1,5 @@
 import catchAsync from '../utils/catchAsync.js';
-import { loginAdmin } from '../services/adminAuthService.js';
+import { loginAdmin, refreshAdminSession } from '../services/adminAuthService.js';
 import {
   enableAdminTotp,
   recoverAdminWithBackupCode,
@@ -56,6 +56,16 @@ export const adminTotpRecover = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Backup recovery code accepted',
+    data: result,
+  });
+});
+
+export const adminSessionHeartbeat = catchAsync(async (req, res) => {
+  const result = await refreshAdminSession(req.admin.id);
+
+  res.status(200).json({
+    success: true,
+    message: 'Admin session refreshed',
     data: result,
   });
 });

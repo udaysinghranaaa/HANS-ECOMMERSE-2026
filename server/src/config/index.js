@@ -33,7 +33,6 @@ const config = {
   mongodbUri: process.env.MONGODB_URI?.trim().replace(/^["']|["']$/g, ''),
   jwt: {
     secret: jwtSecret,
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
   totp: {
     encryptionKey: totpEncryptionKey,

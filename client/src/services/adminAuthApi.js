@@ -48,6 +48,12 @@ export const adminAuthApi = api.injectEndpoints({
         body: { backupCode },
       }),
     }),
+    adminSessionHeartbeat: builder.mutation({
+      query: () => ({
+        url: '/admin/auth/session/heartbeat',
+        method: 'POST',
+      }),
+    }),
   }),
 });
 
@@ -57,4 +63,5 @@ export const {
   useAdminTotpEnableMutation,
   useAdminTotpVerifyMutation,
   useAdminTotpRecoverMutation,
+  useAdminSessionHeartbeatMutation,
 } = adminAuthApi;

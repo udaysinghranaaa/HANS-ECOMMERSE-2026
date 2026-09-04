@@ -1,16 +1,15 @@
 import { Router } from 'express';
 import {
   adminLogin,
+  adminSessionHeartbeat,
   adminTotpEnable,
   adminTotpRecover,
   adminTotpSetup,
   adminTotpVerify,
 } from '../controllers/adminAuthController.js';
 import { adminAuthRateLimiter } from '../middleware/adminAuthRateLimiter.js';
-import {
-  requireAdminTotpVerification,
-  requirePendingTotpToken,
-} from '../middleware/requirePendingTotpToken.js';
+import { protectAdmin } from '../middleware/protectAdmin.js';
+import { requirePendingTotpToken } from '../middleware/requirePendingTotpToken.js';
 import {
   adminBackupCodeSchema,
   adminLoginSchema,
@@ -23,6 +22,12 @@ const router = Router();
 router.use(adminAuthRateLimiter);
 
 router.post('/login', validateBody(adminLoginSchema), adminLogin);
+
+router.post(
+  '/session/heartbeat',
+  protectAdmin,
+  adminSessionHeartbeat,
+);
 
 router.post(
   '/totp/setup',
@@ -39,14 +44,14 @@ router.post(
 
 router.post(
   '/totp/verify',
-  requireAdminTotpVerification,
+  requirePendingTotpToken,
   validateBody(adminTotpCodeSchema),
   adminTotpVerify,
 );
 
 router.post(
   '/totp/recover',
-  requireAdminTotpVerification,
+  requirePendingTotpToken,
   validateBody(adminBackupCodeSchema),
   adminTotpRecover,
 );

@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '../config/prisma.js';
 import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
-import { signPendingTotpToken } from '../utils/jwt.js';
+import { signAdminToken, signPendingTotpToken } from '../utils/jwt.js';
 
 export const ensureDefaultAdmin = async () => {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -84,5 +84,21 @@ export const loginAdmin = async ({ email, password }) => {
       name: admin.name,
       email: admin.email,
     },
+  };
+};
+
+export const refreshAdminSession = async (adminId) => {
+  const admin = await prisma.admin.findUnique({
+    where: { id: adminId },
+    select: { id: true, name: true, email: true },
+  });
+
+  if (!admin) {
+    throw new ApiError(401, 'Admin account no longer exists');
+  }
+
+  return {
+    token: signAdminToken(admin.id),
+    admin,
   };
 };
