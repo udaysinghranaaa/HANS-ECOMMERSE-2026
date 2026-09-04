@@ -82,23 +82,32 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('exit', releaseLock);
 
+const runStartupInitialization = async (startupStartedAt) => {
+  const initStartedAt = Date.now();
+
+  await ensureDefaultAdmin();
+  await ensureDefaultCategories();
+
+  console.log(`Startup initialization completed in ${Date.now() - initStartedAt}ms`);
+  console.log(`Total startup time: ${Date.now() - startupStartedAt}ms`);
+};
+
 const startServer = async () => {
   if (httpServer) {
     return;
   }
 
+  const startupStartedAt = Date.now();
+
   try {
     acquireLock();
     validateTotpEncryptionConfig();
-    await connectDatabase();
-    await ensureDefaultAdmin();
-    await ensureDefaultCategories();
 
     httpServer = app.listen(config.port);
 
     httpServer.on('listening', () => {
       console.log(
-        `Server running in ${config.env} mode on port ${config.port}`,
+        `Server listening in ${Date.now() - startupStartedAt}ms (${config.env} mode on port ${config.port})`,
       );
     });
 
@@ -120,7 +129,17 @@ const startServer = async () => {
 
       process.exit(1);
     });
+
+    await connectDatabase();
+
+    runStartupInitialization(startupStartedAt).catch((error) => {
+      console.error('Startup initialization failed:', error.message);
+    });
   } catch (error) {
+    if (httpServer) {
+      httpServer.close();
+    }
+
     releaseLock();
     console.error('Failed to start server:', error.message);
     process.exit(1);

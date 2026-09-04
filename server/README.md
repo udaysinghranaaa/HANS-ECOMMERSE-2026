@@ -60,6 +60,24 @@ Base URL: `http://localhost:5000/api/v1`
 
 ### Health Check
 
+Render (and other hosts) should use the lightweight root health check:
+
+```http
+GET /health
+```
+
+Response:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+Configure Render **Health Check Path** as `/health`.
+
+Legacy API health endpoint (unchanged):
+
 ```http
 GET /api/v1/health
 ```

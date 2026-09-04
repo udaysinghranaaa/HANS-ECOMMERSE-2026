@@ -15,9 +15,9 @@ export const connectDatabase = async () => {
     dns.setDefaultResultOrder('ipv4first');
   }
 
+  const startedAt = Date.now();
   await prisma.$connect();
-
-  console.log('MongoDB connected via Prisma');
+  console.log(`MongoDB connected via Prisma in ${Date.now() - startedAt}ms`);
 };
 
 export const disconnectDatabase = async () => {
