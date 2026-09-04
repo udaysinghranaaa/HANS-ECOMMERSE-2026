@@ -9,6 +9,18 @@ import {
 const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+const SITE_MEDIA_RECOMMENDED_SIZES = {
+  logo: '400 × 120 px',
+  'about-us': '1200 × 900 px',
+  office: '1200 × 900 px',
+  ...Object.fromEntries(
+    Array.from({ length: 11 }, (_, index) => [
+      `gallery-${index + 1}`,
+      '800 × 600 px',
+    ]),
+  ),
+};
+
 const validateImageFile = (file) => {
   if (!ACCEPTED_TYPES.includes(file.type)) {
     return 'Only JPG, JPEG, PNG and WEBP images are allowed.';
@@ -87,6 +99,11 @@ function SiteMediaUploadCard({ asset, onUpload, isUploading }) {
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-slate-900">{asset.label}</h3>
+        {SITE_MEDIA_RECOMMENDED_SIZES[asset.key] ? (
+          <p className="mt-1 text-xs text-slate-500">
+            Recommended size: {SITE_MEDIA_RECOMMENDED_SIZES[asset.key]}
+          </p>
+        ) : null}
         <p className="text-sm text-slate-500">
           {asset.storedImageUrl ? 'Cloudinary image saved' : 'Using fallback image'}
         </p>

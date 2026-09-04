@@ -725,10 +725,18 @@ export default function AdminProductFormPage() {
         </div>
 
         <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <label className="text-sm font-semibold text-slate-700">
-              Product Images * ({totalImages}/{MAX_IMAGES})
-            </label>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <label className="text-sm font-semibold text-slate-700">
+                Product Images * ({totalImages}/{MAX_IMAGES})
+              </label>
+              <p className="mt-1 text-xs text-slate-500">
+                Recommended size: 1200 × 1200 px
+              </p>
+              <p className="text-xs text-slate-500">
+                Recommended GIF size: 1200 × 1200 px
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => imageInputRef.current?.click()}
@@ -762,7 +770,7 @@ export default function AdminProductFormPage() {
                 Click to upload product images
               </span>
               <span className="text-xs text-slate-500">
-                JPG, PNG, WEBP or GIF up to 5MB each. Recommended 1200 × 1200 px. Maximum {MAX_IMAGES} images.
+                JPG, PNG, WEBP or GIF up to 5MB each. Maximum {MAX_IMAGES} images.
               </span>
             </button>
           ) : (

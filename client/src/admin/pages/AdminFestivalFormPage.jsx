@@ -584,9 +584,12 @@ export default function AdminFestivalFormPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
             Festival Image / Artwork {!isEditing && '*'}
           </label>
+          <p className="mb-2 text-xs text-slate-500">
+            Recommended size: 1400 × 1050 px
+          </p>
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
             {imagePreview ? (
               <img

@@ -193,9 +193,12 @@ export default function AdminCategoryFormPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
             Category Image *
           </label>
+          <p className="mb-2 text-xs text-slate-500">
+            Recommended size: 1200 × 900 px
+          </p>
           <div className="overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50">
             {displayImage ? (
               <div className="relative">
@@ -239,7 +242,7 @@ export default function AdminCategoryFormPage() {
                   Click to upload category image
                 </span>
                 <span className="text-xs text-slate-400">
-                  JPG, PNG or WEBP up to 5MB
+                  JPG, PNG or WEBP up to 5MB. Recommended size: 1200 × 900 px
                 </span>
               </button>
             )}

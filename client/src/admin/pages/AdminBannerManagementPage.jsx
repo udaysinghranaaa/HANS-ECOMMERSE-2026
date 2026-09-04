@@ -360,7 +360,7 @@ function BannerSlotCard({
     <div>
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="text-sm font-semibold text-slate-800">{label}</p>
-        <p className="text-xs text-slate-500">Recommended: {recommendedSize}</p>
+        <p className="text-xs text-slate-500">Recommended size: {recommendedSize}</p>
       </div>
       <div
         className={`overflow-hidden rounded-xl border bg-slate-50 ${
