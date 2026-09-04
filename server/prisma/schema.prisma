@@ -53,6 +53,8 @@ model Product {
   isGovernmentSubsidy Boolean @default(false)
   isOnSale        Boolean  @default(false)
   saleDiscountPercent Float?
+  gstEnabled      Boolean  @default(false)
+  gstPercentage   Float    @default(0)
   festivalId              String?  @db.ObjectId
   festivalDiscountPercent Float?
   createdAt       DateTime @default(now())

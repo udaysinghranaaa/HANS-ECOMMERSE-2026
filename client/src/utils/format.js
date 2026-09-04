@@ -44,6 +44,23 @@ export const getEffectiveProductPricing = (product) => {
 export const getAmountSaved = (pricing) =>
   pricing.discountPercent > 0 ? pricing.originalPrice - pricing.salePrice : 0;
 
+export const getGstPricing = (basePrice, gstEnabled, gstPercentage) => {
+  const price = Number(basePrice) || 0;
+  const enabled = Boolean(gstEnabled);
+  const percent =
+    enabled && Number.isFinite(Number(gstPercentage))
+      ? Number(gstPercentage)
+      : 0;
+  const gstAmount = enabled ? (price * percent) / 100 : 0;
+
+  return {
+    gstEnabled: enabled,
+    gstPercentage: enabled ? percent : 0,
+    gstAmount,
+    finalPrice: price + gstAmount,
+  };
+};
+
 export const stripMediaUrl = (url) => {
   if (!url) {
     return '';

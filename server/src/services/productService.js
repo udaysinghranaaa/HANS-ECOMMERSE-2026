@@ -12,6 +12,7 @@ import {
   isYouTubeVideoUrl,
   normalizeYouTubeVideoInput,
 } from '../utils/videoUrl.js';
+import { calculateGstPricing, normalizeGstFields } from '../utils/gst.js';
 import {
   applyActiveFestivalFields,
   findActiveFestival,
@@ -164,6 +165,12 @@ const resolveProductVideoFields = async ({
 };
 
 const formatProduct = (product, { includeCategory = true } = {}) => {
+  const gstPricing = calculateGstPricing(
+    product.price,
+    product.gstEnabled,
+    product.gstPercentage,
+  );
+
   const formatted = {
     id: product.id,
     name: product.name,
@@ -184,6 +191,10 @@ const formatProduct = (product, { includeCategory = true } = {}) => {
     saleDiscountPercent: product.saleDiscountPercent ?? null,
     festivalId: product.festivalId ?? null,
     festivalDiscountPercent: product.festivalDiscountPercent ?? null,
+    gstEnabled: gstPricing.gstEnabled,
+    gstPercentage: gstPricing.gstPercentage,
+    gstAmount: gstPricing.gstAmount,
+    finalPrice: gstPricing.finalPrice,
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   };
@@ -380,6 +391,8 @@ export const createProduct = async ({
   saleDiscountPercent = null,
   festivalId = null,
   festivalDiscountPercent = null,
+  gstEnabled = false,
+  gstPercentage = 0,
   imageFiles = [],
   videoFile = null,
   videoLink = null,
@@ -427,6 +440,7 @@ export const createProduct = async ({
     festivalId,
     festivalDiscountPercent,
   );
+  const gstFields = normalizeGstFields(gstEnabled, gstPercentage);
 
   const product = await prisma.product.create({
     data: {
@@ -447,6 +461,7 @@ export const createProduct = async ({
       isGovernmentSubsidy,
       ...saleFields,
       ...festivalFields,
+      ...gstFields,
     },
     include: productInclude,
   });
@@ -471,6 +486,8 @@ export const updateProduct = async (
     saleDiscountPercent,
     festivalId,
     festivalDiscountPercent,
+    gstEnabled,
+    gstPercentage,
     existingImages = [],
     imageFiles = [],
     videoFile = null,
@@ -563,6 +580,16 @@ export const updateProduct = async (
         )
       : {};
 
+  const gstUpdate =
+    gstEnabled !== undefined || gstPercentage !== undefined
+      ? normalizeGstFields(
+          gstEnabled ?? existingProduct.gstEnabled,
+          gstEnabled === false
+            ? 0
+            : gstPercentage ?? existingProduct.gstPercentage,
+        )
+      : {};
+
   const product = await prisma.product.update({
     where: { id },
     data: {
@@ -581,6 +608,7 @@ export const updateProduct = async (
       ...(isGovernmentSubsidy !== undefined ? { isGovernmentSubsidy } : {}),
       ...saleUpdate,
       ...festivalUpdate,
+      ...gstUpdate,
       images: mergedImages,
       imagePublicIds: mergedPublicIds,
       videoUrl,

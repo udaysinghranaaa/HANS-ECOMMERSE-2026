@@ -7,6 +7,7 @@ import {
   Shield,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import GstPriceBreakdown from '@/components/shop/GstPriceBreakdown';
 import RelatedProductsSection from '@/components/shop/RelatedProductsSection';
 import { ProductDetailBadges } from '@/components/shop/ProductBadges';
 import { ProductVideosSection } from '@/components/shop/ProductVideo';
@@ -15,7 +16,7 @@ import {
   useGetPublicProductByIdQuery,
   useGetPublicProductsQuery,
 } from '@/services/productsApi';
-import { formatCurrency, getAmountSaved, getEffectiveProductPricing } from '@/utils/format';
+import { formatCurrency, getAmountSaved, getEffectiveProductPricing, getGstPricing } from '@/utils/format';
 import { pickRelatedProducts } from '@/utils/relatedProducts';
 
 function ProductDetailMediaGallery({ product, images }) {
@@ -123,6 +124,11 @@ export default function ProductDetailPage() {
 
   const pricing = getEffectiveProductPricing(product);
   const amountSaved = getAmountSaved(pricing);
+  const gstPricing = getGstPricing(
+    pricing.salePrice,
+    product.gstEnabled,
+    product.gstPercentage,
+  );
 
   return (
     <div className="bg-gray-50 pb-8 sm:pb-10">
@@ -180,26 +186,52 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            <div className="mt-5 flex flex-wrap items-end gap-x-2 gap-y-1 sm:mt-6 sm:gap-x-3 sm:gap-y-2">
-              <span className="text-2xl font-bold text-solar-700 sm:text-3xl">
-                {formatCurrency(pricing.salePrice)}
-              </span>
-              {pricing.discountPercent > 0 && (
-                <>
-                  <span className="text-base text-gray-400 line-through sm:text-lg">
-                    {formatCurrency(pricing.originalPrice)}
-                  </span>
-                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 sm:text-sm">
-                    {pricing.discountPercent}% OFF
-                  </span>
-                  {amountSaved > 0 && (
-                    <span className="w-full text-xs font-medium text-emerald-600 sm:w-auto sm:text-sm">
-                      Save {formatCurrency(amountSaved)}
+            {gstPricing.gstEnabled ? (
+              <div className="mt-5 sm:mt-6">
+                {pricing.discountPercent > 0 && (
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-gray-400 line-through">
+                      {formatCurrency(pricing.originalPrice)}
                     </span>
-                  )}
-                </>
-              )}
-            </div>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                      {pricing.discountPercent}% OFF
+                    </span>
+                    {amountSaved > 0 && (
+                      <span className="text-xs font-medium text-emerald-600">
+                        Save {formatCurrency(amountSaved)}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <GstPriceBreakdown
+                  actualPrice={pricing.salePrice}
+                  gstPercentage={gstPricing.gstPercentage}
+                  gstAmount={gstPricing.gstAmount}
+                  finalPrice={gstPricing.finalPrice}
+                />
+              </div>
+            ) : (
+              <div className="mt-5 flex flex-wrap items-end gap-x-2 gap-y-1 sm:mt-6 sm:gap-x-3 sm:gap-y-2">
+                <span className="text-2xl font-bold text-solar-700 sm:text-3xl">
+                  {formatCurrency(pricing.salePrice)}
+                </span>
+                {pricing.discountPercent > 0 && (
+                  <>
+                    <span className="text-base text-gray-400 line-through sm:text-lg">
+                      {formatCurrency(pricing.originalPrice)}
+                    </span>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 sm:text-sm">
+                      {pricing.discountPercent}% OFF
+                    </span>
+                    {amountSaved > 0 && (
+                      <span className="w-full text-xs font-medium text-emerald-600 sm:w-auto sm:text-sm">
+                        Save {formatCurrency(amountSaved)}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <p className="mt-5 break-words text-sm leading-relaxed text-charcoal-light sm:mt-6 sm:text-base">
               {product.description}

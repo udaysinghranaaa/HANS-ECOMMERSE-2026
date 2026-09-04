@@ -17,12 +17,13 @@ import {
   useGetAdminProductByIdQuery,
   useUpdateProductMutation,
 } from '@/services/productsApi';
-import { stripMediaUrl } from '@/utils/format';
+import { getGstPricing, stripMediaUrl } from '@/utils/format';
 import {
   getYouTubeEmbedUrl,
   getYouTubeWatchUrl,
   isYouTubeVideoUrl,
 } from '@/utils/video';
+import GstPriceBreakdown from '@/components/shop/GstPriceBreakdown';
 import ProductVideo from '@/components/shop/ProductVideo';
 
 const ACCEPTED_IMAGE_TYPES = [
@@ -66,6 +67,8 @@ export default function AdminProductFormPage() {
     isGovernmentSubsidy: false,
     isOnSale: false,
     saleDiscountPercent: '',
+    gstEnabled: false,
+    gstPercentage: '',
   });
   const [specRows, setSpecRows] = useState([emptySpecRow()]);
   const [existingImages, setExistingImages] = useState([]);
@@ -104,6 +107,11 @@ export default function AdminProductFormPage() {
       saleDiscountPercent:
         product.saleDiscountPercent != null
           ? String(product.saleDiscountPercent)
+          : '',
+      gstEnabled: product.gstEnabled === true,
+      gstPercentage:
+        product.gstEnabled === true && product.gstPercentage != null
+          ? String(product.gstPercentage)
           : '',
     });
 
@@ -157,6 +165,30 @@ export default function AdminProductFormPage() {
     return specs;
   }, [specRows]);
 
+  const gstPreview = useMemo(() => {
+    if (!form.gstEnabled) {
+      return null;
+    }
+
+    const basePrice = Number(form.price);
+    const percent = Number(form.gstPercentage);
+
+    if (!Number.isFinite(basePrice) || basePrice <= 0) {
+      return null;
+    }
+
+    if (
+      form.gstPercentage === '' ||
+      Number.isNaN(percent) ||
+      percent < 0 ||
+      percent > 100
+    ) {
+      return null;
+    }
+
+    return getGstPricing(basePrice, true, percent);
+  }, [form.gstEnabled, form.gstPercentage, form.price]);
+
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: '' }));
@@ -199,6 +231,15 @@ export default function AdminProductFormPage() {
         nextErrors.saleDiscountPercent = 'Enter a valid sale discount percentage';
       } else if (salePercent <= 0 || salePercent >= 100) {
         nextErrors.saleDiscountPercent = 'Sale discount must be between 1 and 99';
+      }
+    }
+
+    if (form.gstEnabled) {
+      const gstPercent = Number(form.gstPercentage);
+      if (form.gstPercentage === '' || Number.isNaN(gstPercent)) {
+        nextErrors.gstPercentage = 'GST percentage is required when GST is enabled';
+      } else if (gstPercent < 0 || gstPercent > 100) {
+        nextErrors.gstPercentage = 'GST percentage must be between 0 and 100';
       }
     }
 
@@ -381,6 +422,11 @@ export default function AdminProductFormPage() {
     if (form.isOnSale) {
       formData.append('saleDiscountPercent', form.saleDiscountPercent);
     }
+    formData.append('gstEnabled', String(form.gstEnabled));
+    formData.append(
+      'gstPercentage',
+      form.gstEnabled ? String(form.gstPercentage) : '0',
+    );
 
     newImageFiles.forEach((file) => {
       formData.append('images', file);
@@ -622,6 +668,71 @@ export default function AdminProductFormPage() {
                 <p className="mt-1 text-xs text-red-600">
                   {errors.saleDiscountPercent}
                 </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+          <h3 className="text-sm font-semibold text-slate-800">GST</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Optionally add GST on the product price. Customers will see the
+            GST-inclusive amount on the product page.
+          </p>
+          <label className="mt-4 flex cursor-pointer items-center justify-between gap-3">
+            <span className="text-sm font-medium text-slate-700">Enable GST</span>
+            <span className="relative inline-flex shrink-0 items-center">
+              <input
+                type="checkbox"
+                role="switch"
+                aria-checked={form.gstEnabled}
+                checked={form.gstEnabled}
+                onChange={(event) => {
+                  updateField('gstEnabled', event.target.checked);
+                  if (!event.target.checked) {
+                    updateField('gstPercentage', '');
+                    setErrors((current) => ({
+                      ...current,
+                      gstPercentage: '',
+                    }));
+                  }
+                }}
+                className="peer sr-only"
+              />
+              <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-amber-500 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400 peer-focus-visible:ring-offset-2" />
+              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+            </span>
+          </label>
+
+          {form.gstEnabled && (
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                GST Percentage (%) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="any"
+                value={form.gstPercentage}
+                onChange={(event) =>
+                  updateField('gstPercentage', event.target.value)
+                }
+                className="w-full max-w-xs rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                placeholder="18"
+              />
+              {errors.gstPercentage && (
+                <p className="mt-1 text-xs text-red-600">{errors.gstPercentage}</p>
+              )}
+              {gstPreview && (
+                <div className="mt-4">
+                  <GstPriceBreakdown
+                    actualPrice={Number(form.price)}
+                    gstPercentage={gstPreview.gstPercentage}
+                    gstAmount={gstPreview.gstAmount}
+                    finalPrice={gstPreview.finalPrice}
+                  />
+                </div>
               )}
             </div>
           )}

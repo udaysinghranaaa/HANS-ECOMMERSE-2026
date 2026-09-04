@@ -73,6 +73,14 @@ const mapProductBody = (body, files) => {
       body.festivalDiscountPercent === ''
         ? undefined
         : body.festivalDiscountPercent,
+    gstEnabled:
+      body.gstEnabled === undefined
+        ? undefined
+        : body.gstEnabled === true || body.gstEnabled === 'true',
+    gstPercentage:
+      body.gstPercentage === undefined || body.gstPercentage === ''
+        ? undefined
+        : body.gstPercentage,
     existingImages: parseExistingImages(body.existingImages).map(
       normalizeStoredMediaUrl,
     ),
