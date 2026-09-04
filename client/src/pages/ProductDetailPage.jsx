@@ -151,12 +151,11 @@ export default function ProductDetailPage() {
           <div className="flex min-w-0 flex-col gap-4 sm:gap-6 lg:h-full">
             <div
               data-product-gallery-sticky
-              className="w-full lg:sticky lg:top-24 lg:z-10 lg:self-start"
+              className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:z-10 lg:self-start"
             >
               <ProductDetailMediaGallery key={product.id} product={product} images={images} />
+              <ProductVideosSection product={product} poster={videoPoster} />
             </div>
-
-            <ProductVideosSection product={product} poster={videoPoster} />
           </div>
 
           <div className="min-w-0 lg:pt-1">

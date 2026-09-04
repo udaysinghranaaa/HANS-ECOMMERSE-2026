@@ -78,6 +78,18 @@ export default function ProductVideo({
               preload="metadata"
               className="h-full w-full object-contain"
               poster={poster}
+              onPlay={(event) => {
+                const video = event.currentTarget;
+
+                if (video.requestFullscreen) {
+                  video.requestFullscreen().catch(() => {});
+                  return;
+                }
+
+                if (video.webkitEnterFullscreen) {
+                  video.webkitEnterFullscreen();
+                }
+              }}
             >
               <source src={videoUrl} />
               Your browser does not support the video tag.

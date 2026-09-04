@@ -37,30 +37,25 @@ function BannerCta({ label }) {
 
 function BannerImage({ banner, className, loading, fetchPriority }) {
   const alt = banner.title || `Banner ${banner.position}`;
-  const desktopSrc = banner.imageUrl;
-  const mobileSrc = banner.mobileImageUrl || banner.imageUrl;
   const sharedProps = {
     alt,
+    className,
     decoding: 'async',
     draggable: false,
-    loading,
     fetchPriority,
+    loading,
   };
 
-  return (
-    <>
-      <img
-        {...sharedProps}
-        src={mobileSrc}
-        className={`${className} lg:hidden`}
-      />
-      <img
-        {...sharedProps}
-        src={desktopSrc}
-        className={`${className} hidden lg:block`}
-      />
-    </>
-  );
+  if (banner.mobileImageUrl) {
+    return (
+      <picture className="contents">
+        <source media="(min-width: 1024px)" srcSet={banner.imageUrl} />
+        <img {...sharedProps} src={banner.mobileImageUrl} />
+      </picture>
+    );
+  }
+
+  return <img {...sharedProps} src={banner.imageUrl} />;
 }
 
 function BannerSlideContent({ banner, hasMultipleSlides }) {
