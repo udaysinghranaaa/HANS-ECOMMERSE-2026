@@ -7,7 +7,10 @@ import {
   adminTotpVerify,
 } from '../controllers/adminAuthController.js';
 import { adminAuthRateLimiter } from '../middleware/adminAuthRateLimiter.js';
-import { requirePendingTotpToken } from '../middleware/requirePendingTotpToken.js';
+import {
+  requireAdminTotpVerification,
+  requirePendingTotpToken,
+} from '../middleware/requirePendingTotpToken.js';
 import {
   adminBackupCodeSchema,
   adminLoginSchema,
@@ -36,14 +39,14 @@ router.post(
 
 router.post(
   '/totp/verify',
-  requirePendingTotpToken,
+  requireAdminTotpVerification,
   validateBody(adminTotpCodeSchema),
   adminTotpVerify,
 );
 
 router.post(
   '/totp/recover',
-  requirePendingTotpToken,
+  requireAdminTotpVerification,
   validateBody(adminBackupCodeSchema),
   adminTotpRecover,
 );

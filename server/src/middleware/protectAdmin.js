@@ -3,7 +3,7 @@ import prisma from '../config/prisma.js';
 import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
 import catchAsync from '../utils/catchAsync.js';
-import { verifyAdminToken } from '../utils/jwt.js';
+import { isTotpVerificationFresh, verifyAdminToken } from '../utils/jwt.js';
 
 export const protectAdmin = catchAsync(async (req, _res, next) => {
   if (!config.jwt.secret) {
@@ -27,6 +27,13 @@ export const protectAdmin = catchAsync(async (req, _res, next) => {
 
     if (decoded.stage !== 'authenticated' || !decoded.totpVerified) {
       throw new ApiError(401, 'Admin authentication required');
+    }
+
+    if (!isTotpVerificationFresh(decoded.totpVerifiedAt)) {
+      throw new ApiError(
+        401,
+        'Two-factor verification expired. Please verify again.',
+      );
     }
 
     const admin = await prisma.admin.findUnique({

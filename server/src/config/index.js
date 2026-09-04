@@ -22,7 +22,10 @@ const parseClientUrls = (value) => {
 const clientUrls = parseClientUrls(process.env.CLIENT_URL);
 
 const jwtSecret = stripEnv(process.env.JWT_SECRET);
-const totpEncryptionKey = stripEnv(process.env.TOTP_ENCRYPTION_KEY) || jwtSecret;
+const totpEncryptionKeyFromEnv =
+  stripEnv(process.env.TOTP_ENCRYPTION_KEY) ||
+  stripEnv(process.env.ENCRYPTION_KEY);
+const totpEncryptionKey = totpEncryptionKeyFromEnv || jwtSecret;
 
 const config = {
   env: process.env.NODE_ENV || 'development',
@@ -36,7 +39,9 @@ const config = {
     encryptionKey: totpEncryptionKey,
     encryptionKeySource: stripEnv(process.env.TOTP_ENCRYPTION_KEY)
       ? 'TOTP_ENCRYPTION_KEY'
-      : 'JWT_SECRET',
+      : stripEnv(process.env.ENCRYPTION_KEY)
+        ? 'ENCRYPTION_KEY'
+        : 'JWT_SECRET',
   },
   clientUrls,
   clientUrl: clientUrls[0],
