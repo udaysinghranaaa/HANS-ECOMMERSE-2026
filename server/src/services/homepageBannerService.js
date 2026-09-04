@@ -107,6 +107,9 @@ const formatBanner = (banner, categorySlugMap = new Map()) => {
     position: banner.position,
     title: banner.title,
     imageUrl: toAbsoluteMediaUrl(banner.imageUrl, banner.updatedAt, { width: 1920 }),
+    mobileImageUrl: banner.mobileImageUrl
+      ? toAbsoluteMediaUrl(banner.mobileImageUrl, banner.updatedAt, { width: 1080 })
+      : null,
     isActive: banner.isActive,
     linkType,
     linkTargetId: banner.linkTargetId || null,
@@ -154,12 +157,25 @@ export const upsertHomepageBanner = async ({
   position,
   title,
   imageFile,
+  mobileImageFile,
   linkType,
   linkTargetId,
   linkUrl,
 }) => {
   if (!BANNER_POSITIONS.includes(position)) {
     throw new ApiError(400, 'Banner position must be between 1 and 4');
+  }
+
+  const existingBanner = await prisma.homepageBanner.findUnique({
+    where: { position },
+  });
+
+  if (!imageFile && !existingBanner) {
+    throw new ApiError(400, 'Desktop banner image is required');
+  }
+
+  if (!imageFile && !mobileImageFile && !existingBanner) {
+    throw new ApiError(400, 'At least one banner image is required');
   }
 
   const normalizedLinkType = normalizeLinkType(linkType);
@@ -169,18 +185,42 @@ export const upsertHomepageBanner = async ({
     linkUrl,
   );
 
-  const { url: imageUrl, publicId: imagePublicId } = await persistUploadedImage(
-    imageFile,
-    'banners',
-  );
-  const existingBanner = await prisma.homepageBanner.findUnique({
-    where: { position },
-  });
+  let imageUrl = existingBanner?.imageUrl ?? '';
+  let imagePublicId = existingBanner?.imagePublicId ?? null;
+  let mobileImageUrl = existingBanner?.mobileImageUrl ?? null;
+  let mobileImagePublicId = existingBanner?.mobileImagePublicId ?? null;
+
+  if (imageFile) {
+    const uploadedImage = await persistUploadedImage(imageFile, 'banners');
+
+    if (existingBanner?.imageUrl) {
+      await deleteBannerFile(existingBanner.imageUrl, existingBanner.imagePublicId);
+    }
+
+    imageUrl = uploadedImage.url;
+    imagePublicId = uploadedImage.publicId;
+  }
+
+  if (mobileImageFile) {
+    const uploadedMobileImage = await persistUploadedImage(mobileImageFile, 'banners');
+
+    if (existingBanner?.mobileImageUrl) {
+      await deleteBannerFile(
+        existingBanner.mobileImageUrl,
+        existingBanner.mobileImagePublicId,
+      );
+    }
+
+    mobileImageUrl = uploadedMobileImage.url;
+    mobileImagePublicId = uploadedMobileImage.publicId;
+  }
 
   const bannerData = {
     title,
     imageUrl,
     imagePublicId,
+    mobileImageUrl,
+    mobileImagePublicId,
     isActive: true,
     linkType: normalizedLinkType,
     linkTargetId: linkFields.linkTargetId,
@@ -188,8 +228,6 @@ export const upsertHomepageBanner = async ({
   };
 
   if (existingBanner) {
-    await deleteBannerFile(existingBanner.imageUrl, existingBanner.imagePublicId);
-
     const banner = await prisma.homepageBanner.update({
       where: { position },
       data: bannerData,
@@ -283,6 +321,10 @@ export const deleteHomepageBannerByPosition = async (position) => {
 
   await prisma.homepageBanner.delete({ where: { position } });
   await deleteBannerFile(banner.imageUrl, banner.imagePublicId);
+
+  if (banner.mobileImageUrl) {
+    await deleteBannerFile(banner.mobileImageUrl, banner.mobileImagePublicId);
+  }
 
   return { message: 'Banner removed successfully' };
 };

@@ -172,11 +172,15 @@ function BannerSlotCard({
   isUpdatingLink,
   isDeleting,
 }) {
-  const fileInputRef = useRef(null);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
+  const desktopFileInputRef = useRef(null);
+  const mobileFileInputRef = useRef(null);
+  const [previewDesktopUrl, setPreviewDesktopUrl] = useState('');
+  const [previewMobileUrl, setPreviewMobileUrl] = useState('');
+  const [selectedDesktopFile, setSelectedDesktopFile] = useState(null);
+  const [selectedMobileFile, setSelectedMobileFile] = useState(null);
   const [localError, setLocalError] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingDesktop, setIsDraggingDesktop] = useState(false);
+  const [isDraggingMobile, setIsDraggingMobile] = useState(false);
   const [linkType, setLinkType] = useState(banner?.linkType || 'none');
   const [linkTargetId, setLinkTargetId] = useState(banner?.linkTargetId || '');
   const [linkUrl, setLinkUrl] = useState(banner?.linkUrl || '');
@@ -189,35 +193,63 @@ function BannerSlotCard({
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      if (previewDesktopUrl) {
+        URL.revokeObjectURL(previewDesktopUrl);
+      }
+      if (previewMobileUrl) {
+        URL.revokeObjectURL(previewMobileUrl);
       }
     };
-  }, [previewUrl]);
+  }, [previewDesktopUrl, previewMobileUrl]);
 
-  const clearPreview = useCallback(() => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+  const clearDesktopPreview = useCallback(() => {
+    if (previewDesktopUrl) {
+      URL.revokeObjectURL(previewDesktopUrl);
     }
-    setPreviewUrl('');
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    setPreviewDesktopUrl('');
+    setSelectedDesktopFile(null);
+    if (desktopFileInputRef.current) {
+      desktopFileInputRef.current.value = '';
     }
-  }, [previewUrl]);
+  }, [previewDesktopUrl]);
 
-  const handleFile = (file) => {
+  const clearMobilePreview = useCallback(() => {
+    if (previewMobileUrl) {
+      URL.revokeObjectURL(previewMobileUrl);
+    }
+    setPreviewMobileUrl('');
+    setSelectedMobileFile(null);
+    if (mobileFileInputRef.current) {
+      mobileFileInputRef.current.value = '';
+    }
+  }, [previewMobileUrl]);
+
+  const handleDesktopFile = (file) => {
     const errorMessage = validateBannerFile(file);
     if (errorMessage) {
       setLocalError(errorMessage);
-      clearPreview();
+      clearDesktopPreview();
       return;
     }
 
     setLocalError('');
-    clearPreview();
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    clearDesktopPreview();
+    setSelectedDesktopFile(file);
+    setPreviewDesktopUrl(URL.createObjectURL(file));
+  };
+
+  const handleMobileFile = (file) => {
+    const errorMessage = validateBannerFile(file);
+    if (errorMessage) {
+      setLocalError(errorMessage);
+      clearMobilePreview();
+      return;
+    }
+
+    setLocalError('');
+    clearMobilePreview();
+    setSelectedMobileFile(file);
+    setPreviewMobileUrl(URL.createObjectURL(file));
   };
 
   const appendLinkFields = (formData) => {
@@ -252,8 +284,16 @@ function BannerSlotCard({
   };
 
   const handlePublish = async () => {
-    if (!selectedFile) {
-      fileInputRef.current?.click();
+    if (!selectedDesktopFile && !selectedMobileFile) {
+      if (!banner) {
+        setLocalError('Desktop banner image is required.');
+        desktopFileInputRef.current?.click();
+      }
+      return;
+    }
+
+    if (!selectedDesktopFile && !banner) {
+      setLocalError('Desktop banner image is required.');
       return;
     }
 
@@ -264,13 +304,19 @@ function BannerSlotCard({
     setLocalError('');
 
     const formData = new FormData();
-    formData.append('image', selectedFile);
+    if (selectedDesktopFile) {
+      formData.append('image', selectedDesktopFile);
+    }
+    if (selectedMobileFile) {
+      formData.append('mobileImage', selectedMobileFile);
+    }
     formData.append('title', `Banner ${position}`);
     appendLinkFields(formData);
 
     try {
       await onUpload(position, formData);
-      clearPreview();
+      clearDesktopPreview();
+      clearMobilePreview();
     } catch (error) {
       setLocalError(error?.data?.message || 'Failed to publish banner.');
     }
@@ -298,7 +344,57 @@ function BannerSlotCard({
     }
   };
 
-  const displayImage = previewUrl || banner?.imageUrl;
+  const displayDesktopImage = previewDesktopUrl || banner?.imageUrl;
+  const displayMobileImage = previewMobileUrl || banner?.mobileImageUrl;
+
+  const renderBannerPreview = ({
+    label,
+    recommendedSize,
+    displayImage,
+    isDragging,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    onChoose,
+  }) => (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-slate-800">{label}</p>
+        <p className="text-xs text-slate-500">Recommended: {recommendedSize}</p>
+      </div>
+      <div
+        className={`overflow-hidden rounded-xl border bg-slate-50 ${
+          isDragging ? 'border-amber-400 ring-2 ring-amber-100' : 'border-slate-200'
+        }`}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+      >
+        {displayImage ? (
+          <img
+            src={displayImage}
+            alt={`${label} ${position}`}
+            className="block h-36 w-full object-cover object-center sm:h-40"
+          />
+        ) : (
+          <div className="flex h-36 flex-col items-center justify-center px-4 text-center sm:h-40">
+            <ImagePlus className="h-7 w-7 text-slate-400" />
+            <p className="mt-2 text-sm text-slate-500">
+              Drag and drop or choose an image
+            </p>
+          </div>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onChoose}
+        className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+      >
+        <Upload className="h-3.5 w-3.5" />
+        {displayImage ? `Replace ${label}` : `Choose ${label}`}
+      </button>
+    </div>
+  );
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -314,38 +410,48 @@ function BannerSlotCard({
         <StatusBadge active={Boolean(banner?.isActive)} label={banner ? 'Active' : 'Empty'} />
       </div>
 
-      <div
-        className={`overflow-hidden rounded-xl border bg-slate-50 ${
-          isDragging ? 'border-amber-400 ring-2 ring-amber-100' : 'border-slate-200'
-        }`}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(event) => {
-          event.preventDefault();
-          setIsDragging(false);
-          const file = event.dataTransfer.files?.[0];
-          if (file) {
-            handleFile(file);
-          }
-        }}
-      >
-        {displayImage ? (
-          <img
-            src={displayImage}
-            alt={`Banner ${position}`}
-            className="block h-44 w-full object-cover object-center sm:h-52"
-          />
-        ) : (
-          <div className="flex h-44 flex-col items-center justify-center px-4 text-center sm:h-52">
-            <ImagePlus className="h-8 w-8 text-slate-400" />
-            <p className="mt-2 text-sm text-slate-500">
-              Drag and drop or choose an image
-            </p>
-          </div>
-        )}
+      <div className="space-y-4">
+        {renderBannerPreview({
+          label: 'Desktop Banner',
+          recommendedSize: '1920 × 560 px',
+          displayImage: displayDesktopImage,
+          isDragging: isDraggingDesktop,
+          onDragOver: (event) => {
+            event.preventDefault();
+            setIsDraggingDesktop(true);
+          },
+          onDragLeave: () => setIsDraggingDesktop(false),
+          onDrop: (event) => {
+            event.preventDefault();
+            setIsDraggingDesktop(false);
+            const file = event.dataTransfer.files?.[0];
+            if (file) {
+              handleDesktopFile(file);
+            }
+          },
+          onChoose: () => desktopFileInputRef.current?.click(),
+        })}
+
+        {renderBannerPreview({
+          label: 'Mobile Banner',
+          recommendedSize: '1080 × 700 px',
+          displayImage: displayMobileImage,
+          isDragging: isDraggingMobile,
+          onDragOver: (event) => {
+            event.preventDefault();
+            setIsDraggingMobile(true);
+          },
+          onDragLeave: () => setIsDraggingMobile(false),
+          onDrop: (event) => {
+            event.preventDefault();
+            setIsDraggingMobile(false);
+            const file = event.dataTransfer.files?.[0];
+            if (file) {
+              handleMobileFile(file);
+            }
+          },
+          onChoose: () => mobileFileInputRef.current?.click(),
+        })}
       </div>
 
       <BannerLinkFields
@@ -376,14 +482,27 @@ function BannerSlotCard({
       )}
 
       <input
-        ref={fileInputRef}
+        ref={desktopFileInputRef}
         type="file"
         accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
           if (file) {
-            handleFile(file);
+            handleDesktopFile(file);
+          }
+        }}
+      />
+
+      <input
+        ref={mobileFileInputRef}
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            handleMobileFile(file);
           }
         }}
       />
@@ -391,16 +510,7 @@ function BannerSlotCard({
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          <Upload className="h-4 w-4" />
-          {banner ? 'Replace Banner' : 'Choose Image'}
-        </button>
-
-        <button
-          type="button"
-          disabled={!selectedFile || isUploading}
+          disabled={(!selectedDesktopFile && !selectedMobileFile) || isUploading}
           onClick={handlePublish}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2.5 text-sm font-semibold text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
         >

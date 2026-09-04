@@ -123,9 +123,11 @@ model HomepageBanner {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   position      Int      @unique
   title         String
-  imageUrl      String
-  imagePublicId String?
-  isActive      Boolean  @default(true)
+  imageUrl            String
+  imagePublicId       String?
+  mobileImageUrl      String?
+  mobileImagePublicId String?
+  isActive            Boolean  @default(true)
   linkType      String   @default("none")
   linkTargetId  String?  @db.ObjectId
   linkUrl       String?

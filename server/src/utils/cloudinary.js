@@ -270,6 +270,8 @@ export const deleteCloudinaryResource = async (url, resourceType = 'image') => {
   await deleteCloudinaryResourceByPublicId(publicId, resolvedResourceType);
 };
 
+const isGifDeliveryUrl = (url) => /\.gif(\?|#|$)/i.test(url.split('?')[0]);
+
 export const optimizeCloudinaryUrl = (url, { width, height, crop = 'limit' } = {}) => {
   if (!isCloudinaryUrl(url)) {
     return url;
@@ -279,7 +281,7 @@ export const optimizeCloudinaryUrl = (url, { width, height, crop = 'limit' } = {
     return url;
   }
 
-  const transforms = ['f_auto', 'q_auto'];
+  const transforms = isGifDeliveryUrl(url) ? [] : ['f_auto', 'q_auto'];
 
   if (width) {
     transforms.push(`w_${width}`);

@@ -15,14 +15,51 @@ const SWIPE_THRESHOLD = 50;
 const bannerNavSelector = '[data-banner-nav]';
 
 function BannerCta({ label }) {
+  const isLearnMore = label === 'Learn More';
+
   return (
     <span
       data-banner-cta
-      className="pointer-events-none inline-flex min-h-[44px] max-w-[min(calc(100vw-2.5rem),280px)] items-center justify-center gap-2 rounded-full border border-white/40 bg-solar-600 px-4 py-2.5 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(0,0,0,0.35),0_4px_12px_rgba(22,101,52,0.5)] ring-2 ring-white/30 transition-all duration-300 group-hover:bg-solar-700 group-hover:shadow-[0_10px_28px_rgba(0,0,0,0.4),0_6px_16px_rgba(22,101,52,0.55)] group-focus-visible:ring-white group-active:scale-[0.98] sm:min-h-[46px] sm:max-w-none sm:px-5 sm:text-[15px]"
+      className={`pointer-events-none inline-flex items-center justify-center rounded-full border border-white/40 bg-solar-600 font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(0,0,0,0.35),0_4px_12px_rgba(22,101,52,0.5)] ring-2 ring-white/30 transition-all duration-300 group-hover:bg-solar-700 group-hover:shadow-[0_10px_28px_rgba(0,0,0,0.4),0_6px_16px_rgba(22,101,52,0.55)] group-focus-visible:ring-white group-active:scale-[0.98] ${
+        isLearnMore
+          ? 'min-h-[38px] max-w-[min(calc(100vw-5rem),200px)] gap-1 px-3 py-1.5 text-xs whitespace-nowrap lg:min-h-[46px] lg:max-w-none lg:gap-2 lg:px-5 lg:py-2.5 lg:text-[15px]'
+          : 'min-h-[44px] max-w-[min(calc(100vw-2.5rem),280px)] gap-2 px-4 py-2.5 text-sm sm:min-h-[46px] sm:max-w-none sm:px-5 sm:text-[15px]'
+      }`}
     >
       <span className="truncate drop-shadow-sm">{label}</span>
-      <ArrowRight className="h-4 w-4 shrink-0 drop-shadow-sm" aria-hidden="true" />
+      <ArrowRight
+        className={`shrink-0 drop-shadow-sm ${isLearnMore ? 'h-3.5 w-3.5 lg:h-4 lg:w-4' : 'h-4 w-4'}`}
+        aria-hidden="true"
+      />
     </span>
+  );
+}
+
+function BannerImage({ banner, className, loading, fetchPriority }) {
+  const alt = banner.title || `Banner ${banner.position}`;
+  const desktopSrc = banner.imageUrl;
+  const mobileSrc = banner.mobileImageUrl || banner.imageUrl;
+  const sharedProps = {
+    alt,
+    decoding: 'async',
+    draggable: false,
+    loading,
+    fetchPriority,
+  };
+
+  return (
+    <>
+      <img
+        {...sharedProps}
+        src={mobileSrc}
+        className={`${className} lg:hidden`}
+      />
+      <img
+        {...sharedProps}
+        src={desktopSrc}
+        className={`${className} hidden lg:block`}
+      />
+    </>
   );
 }
 
@@ -37,14 +74,11 @@ function BannerSlideContent({ banner, hasMultipleSlides }) {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      <img
-        src={banner.imageUrl}
-        alt={banner.title || `Banner ${banner.position}`}
-        className="h-[260px] w-full bg-slate-900 object-contain object-center transition-transform duration-500 group-hover:scale-[1.02] group-active:scale-[0.995] sm:h-[340px] sm:object-cover md:h-[500px] lg:h-[560px]"
+      <BannerImage
+        banner={banner}
+        className="h-[260px] w-full bg-slate-900 object-contain object-center transition-transform duration-500 group-hover:scale-[1.02] group-active:scale-[0.995] sm:h-[340px] sm:object-cover md:h-[500px] lg:h-[560px] lg:object-cover"
         loading={banner.position === 1 ? 'eager' : 'lazy'}
-        decoding="async"
         fetchPriority={banner.position === 1 ? 'high' : 'auto'}
-        draggable={false}
       />
 
       <span
@@ -68,14 +102,11 @@ function BannerSlide({ banner, categorySlugById, hasMultipleSlides }) {
 
   if (!href) {
     return (
-      <img
-        src={banner.imageUrl}
-        alt={banner.title || `Banner ${banner.position}`}
-        className="h-[260px] w-full bg-slate-900 object-contain object-center sm:h-[340px] sm:object-cover md:h-[500px] lg:h-[560px]"
+      <BannerImage
+        banner={banner}
+        className="h-[260px] w-full bg-slate-900 object-contain object-center sm:h-[340px] sm:object-cover md:h-[500px] lg:h-[560px] lg:object-cover"
         loading={banner.position === 1 ? 'eager' : 'lazy'}
-        decoding="async"
         fetchPriority={banner.position === 1 ? 'high' : 'auto'}
-        draggable={false}
       />
     );
   }

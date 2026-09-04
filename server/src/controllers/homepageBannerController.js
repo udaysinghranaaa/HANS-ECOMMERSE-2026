@@ -39,8 +39,11 @@ export const getAdminHomepageBannersHandler = catchAsync(async (_req, res) => {
 });
 
 export const upsertAdminHomepageBanner = catchAsync(async (req, res) => {
-  if (!req.file) {
-    throw new ApiError(400, 'Banner image is required');
+  const imageFile = req.files?.image?.[0];
+  const mobileImageFile = req.files?.mobileImage?.[0];
+
+  if (!imageFile && !mobileImageFile) {
+    throw new ApiError(400, 'At least one banner image is required');
   }
 
   const position = parsePosition(req.params.position);
@@ -49,7 +52,8 @@ export const upsertAdminHomepageBanner = catchAsync(async (req, res) => {
   const banner = await upsertHomepageBanner({
     position,
     title,
-    imageFile: req.file,
+    imageFile,
+    mobileImageFile,
     linkType: req.body.linkType,
     linkTargetId: req.body.linkTargetId,
     linkUrl: req.body.linkUrl,

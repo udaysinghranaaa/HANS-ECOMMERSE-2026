@@ -6,7 +6,7 @@ import {
   upsertAdminHomepageBanner,
 } from '../controllers/homepageBannerController.js';
 import { protectAdmin } from '../middleware/protectAdmin.js';
-import { bannerUpload } from '../utils/fileUpload.js';
+import { bannerMediaUpload } from '../utils/fileUpload.js';
 import { homepageBannerUpdateSchema, validateBody } from '../validators/schemas.js';
 
 const router = Router();
@@ -16,7 +16,7 @@ router.use(protectAdmin);
 router.get('/banners', getAdminHomepageBannersHandler);
 router.post(
   '/banners/:position',
-  bannerUpload.single('image'),
+  bannerMediaUpload,
   upsertAdminHomepageBanner,
 );
 router.put(

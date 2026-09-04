@@ -36,6 +36,11 @@ const allowedImageMimeTypes = new Set([
   'image/webp',
 ]);
 
+const allowedProductImageMimeTypes = new Set([
+  ...allowedImageMimeTypes,
+  'image/gif',
+]);
+
 const allowedVideoMimeTypes = new Set([
   'video/mp4',
   'video/webm',
@@ -64,12 +69,12 @@ const productFileFilter = (_req, file, cb) => {
     return;
   }
 
-  if (allowedImageMimeTypes.has(file.mimetype)) {
+  if (allowedProductImageMimeTypes.has(file.mimetype)) {
     cb(null, true);
     return;
   }
 
-  cb(new ApiError(400, 'Only JPG, JPEG, PNG and WEBP images are allowed'));
+  cb(new ApiError(400, 'Only JPG, JPEG, PNG, WEBP and GIF images are allowed'));
 };
 
 export const bannerUpload = multer({
@@ -77,6 +82,15 @@ export const bannerUpload = multer({
   fileFilter: bannerFileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+export const bannerMediaUpload = multer({
+  storage: memoryStorage,
+  fileFilter: bannerFileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'mobileImage', maxCount: 1 },
+]);
 
 export const categoryUpload = multer({
   storage: memoryStorage,

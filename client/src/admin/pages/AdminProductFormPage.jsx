@@ -25,7 +25,13 @@ import {
 } from '@/utils/video';
 import ProductVideo from '@/components/shop/ProductVideo';
 
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPTED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+];
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
@@ -214,7 +220,7 @@ export default function AdminProductFormPage() {
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
         setErrors((current) => ({
           ...current,
-          images: 'Only JPG, JPEG, PNG and WEBP images are allowed',
+          images: 'Only JPG, JPEG, PNG, WEBP and GIF images are allowed',
         }));
         return;
       }
@@ -736,7 +742,7 @@ export default function AdminProductFormPage() {
           <input
             ref={imageInputRef}
             type="file"
-            accept={ACCEPTED_IMAGE_TYPES.join(',')}
+            accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
             multiple
             className="hidden"
             onChange={(event) => {
@@ -756,7 +762,7 @@ export default function AdminProductFormPage() {
                 Click to upload product images
               </span>
               <span className="text-xs text-slate-500">
-                JPG, PNG or WEBP up to 5MB each. Maximum {MAX_IMAGES} images.
+                JPG, PNG, WEBP or GIF up to 5MB each. Recommended 1200 × 1200 px. Maximum {MAX_IMAGES} images.
               </span>
             </button>
           ) : (
