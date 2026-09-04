@@ -42,7 +42,20 @@ function ProductCarousel({ products, isVisible, sectionKey, fadeFrom }) {
   const showControls = products.length > 1;
 
   return (
-    <div className="relative mt-8 sm:mt-9">
+    <>
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:hidden">
+        {products.map((product, index) => (
+          <div
+            key={`${sectionKey}-mobile-${product.id}`}
+            style={{ animationDelay: `${100 + index * 70}ms` }}
+            className={`reveal-up min-w-0 ${isVisible ? 'is-visible' : ''}`}
+          >
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
+
+      <div className="relative mt-8 hidden sm:mt-9 sm:block">
       <CarouselFadeEdges from={fadeFrom} />
 
       {showControls && canScrollLeft && (
@@ -77,6 +90,7 @@ function ProductCarousel({ products, isVisible, sectionKey, fadeFrom }) {
         ))}
       </div>
     </div>
+    </>
   );
 }
 
@@ -184,7 +198,7 @@ export default function FeaturedProductsSection({ section = 'all' }) {
         <FeaturedProductBlock
           sectionKey="trending"
           eyebrow="Trending Now"
-          title="Trending Products"
+          title="TRENDING PRODUCTS"
           subtitle="Our most popular solar products, loved by customers."
           products={trendingProducts}
           icon={Sparkles}
@@ -194,7 +208,7 @@ export default function FeaturedProductsSection({ section = 'all' }) {
         <FeaturedProductBlock
           sectionKey="subsidy"
           eyebrow="Subsidy Eligible"
-          title="Top Government Subsidy Products"
+          title="TOP GOVT SUBSIDY PRODUCTS"
           subtitle="Popular subsidy-eligible solar solutions to help you save more on clean energy."
           products={subsidyProducts}
           icon={Landmark}
@@ -211,7 +225,7 @@ export default function FeaturedProductsSection({ section = 'all' }) {
         <FeaturedProductBlock
           sectionKey="trending"
           eyebrow="Trending Now"
-          title="Trending Products"
+          title="TRENDING PRODUCTS"
           subtitle="Our most popular solar products, loved by customers."
           products={trendingProducts}
           icon={Sparkles}
@@ -223,7 +237,7 @@ export default function FeaturedProductsSection({ section = 'all' }) {
         <FeaturedProductBlock
           sectionKey="subsidy"
           eyebrow="Subsidy Eligible"
-          title="Top Government Subsidy Products"
+          title="TOP GOVT SUBSIDY PRODUCTS"
           subtitle="Popular subsidy-eligible solar solutions to help you save more on clean energy."
           products={subsidyProducts}
           icon={Landmark}

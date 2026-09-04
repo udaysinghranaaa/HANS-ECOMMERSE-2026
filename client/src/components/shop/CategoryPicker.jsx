@@ -223,11 +223,11 @@ export default function CategoryPicker({
             role="dialog"
             aria-modal="true"
             aria-label="All categories"
-            className={`fixed inset-x-0 bottom-0 z-50 max-h-[min(88vh,720px)] rounded-t-3xl border border-slate-200 bg-white shadow-[0_-16px_48px_rgba(15,23,42,0.14)] transition-transform duration-300 ease-out ${
+            className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[min(88vh,720px)] flex-col rounded-t-3xl border border-slate-200 bg-white shadow-[0_-16px_48px_rgba(15,23,42,0.14)] transition-transform duration-300 ease-out ${
               open ? 'translate-y-0' : 'pointer-events-none translate-y-full'
             }`}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3.5">
               <div>
                 <p className="text-sm font-bold text-charcoal">All Categories</p>
                 <p className="text-xs text-charcoal-light">
@@ -246,7 +246,7 @@ export default function CategoryPicker({
               </button>
             </div>
 
-            <div className="panel-scroll overflow-y-auto overscroll-contain px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="panel-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {items.map((item) => (
                   <CategoryGridItem
