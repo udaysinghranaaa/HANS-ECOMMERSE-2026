@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { isAdminSessionActive } from '@/admin/utils/adminSession';
 
 const AUTH_STORAGE_KEY = 'hans_solar_admin_auth';
 
@@ -12,11 +13,17 @@ const loadStoredAuth = () => {
 };
 
 const storedAuth = loadStoredAuth();
+const storedToken = storedAuth?.token ?? null;
+const hasActiveSession = isAdminSessionActive(storedToken);
+
+if (storedAuth?.token && !hasActiveSession) {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+}
 
 const initialState = {
-  isAuthenticated: Boolean(storedAuth?.token),
-  admin: storedAuth?.admin ?? null,
-  token: storedAuth?.token ?? null,
+  isAuthenticated: Boolean(storedToken && hasActiveSession),
+  admin: hasActiveSession ? storedAuth?.admin ?? null : null,
+  token: hasActiveSession ? storedToken : null,
 };
 
 const adminAuthSlice = createSlice({

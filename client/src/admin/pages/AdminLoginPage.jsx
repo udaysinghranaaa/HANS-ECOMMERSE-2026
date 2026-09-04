@@ -14,6 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { login } from '@/admin/store/adminAuthSlice';
+import { isAdminSessionActive } from '@/admin/utils/adminSession';
 import {
   useAdminLoginMutation,
   useAdminTotpEnableMutation,
@@ -224,6 +225,7 @@ export default function AdminLoginPage() {
   const isAuthenticated = useSelector(
     (state) => state.adminAuth.isAuthenticated,
   );
+  const token = useSelector((state) => state.adminAuth.token);
 
   const [adminLogin, { isLoading: isLoggingIn }] = useAdminLoginMutation();
   const [adminTotpSetup, { isLoading: isSettingUp }] = useAdminTotpSetupMutation();
@@ -344,7 +346,7 @@ export default function AdminLoginPage() {
     }
   };
 
-  if (isAuthenticated) {
+  if (isAuthenticated && isAdminSessionActive(token)) {
     return <Navigate to="/admin/dashboard" replace />;
   }
 

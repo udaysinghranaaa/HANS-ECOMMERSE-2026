@@ -1,17 +1,14 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { isAdminSessionActive } from '@/admin/utils/adminSession';
 
-/**
- * Admin route guard — mock auth only for now.
- * Redirects unauthenticated users to /admin/login.
- * Real JWT/session validation will replace this later.
- */
 export default function AdminProtectedRoute() {
   const isAuthenticated = useSelector(
     (state) => state.adminAuth.isAuthenticated,
   );
+  const token = useSelector((state) => state.adminAuth.token);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isAdminSessionActive(token)) {
     return <Navigate to="/admin/login" replace />;
   }
 
