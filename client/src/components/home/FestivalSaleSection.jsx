@@ -63,17 +63,17 @@ function FestivalProductCard({ product, onViewDetails, imagePriority = false }) 
         )}
       </button>
 
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-solar-600">
+      <div className="flex flex-1 flex-col p-3 lg:p-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-solar-600 lg:text-[11px]">
           {product.category?.name || 'Solar Product'}
         </p>
 
-        <h3 className="mt-1.5 line-clamp-2 min-h-[2.75rem] text-base font-bold leading-snug text-charcoal transition-colors group-hover:text-solar-700 sm:text-[1.05rem]">
+        <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-charcoal transition-colors group-hover:text-solar-700 lg:mt-1.5 lg:min-h-[2.75rem] lg:text-base xl:text-[1.05rem]">
           {product.name}
         </h3>
 
-        <div className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-1">
-          <span className="text-xl font-bold tracking-tight text-charcoal sm:text-2xl">
+        <div className="mt-2 flex flex-wrap items-end gap-x-1.5 gap-y-1 lg:mt-3 lg:gap-x-2">
+          <span className="text-lg font-bold tracking-tight text-charcoal lg:text-xl xl:text-2xl">
             {formatCurrency(pricing.salePrice)}
           </span>
           {pricing.discountPercent > 0 && (
@@ -91,10 +91,10 @@ function FestivalProductCard({ product, onViewDetails, imagePriority = false }) 
         <button
           type="button"
           onClick={onViewDetails}
-          className="mt-4 inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-slate-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-solar-600 hover:text-white hover:shadow-lg hover:shadow-solar-600/20 group-hover:bg-solar-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-solar-600/20"
+          className="mt-3 inline-flex w-full min-h-[40px] items-center justify-center gap-1.5 rounded-xl bg-slate-700 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-solar-600 hover:text-white hover:shadow-lg hover:shadow-solar-600/20 group-hover:bg-solar-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-solar-600/20 lg:mt-4 lg:min-h-[44px] lg:gap-2 lg:px-4 lg:py-3 lg:text-sm"
         >
           <span className="text-white">View Deal</span>
-          <ArrowRight className="h-4 w-4 text-white transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
+          <ArrowRight className="h-3.5 w-3.5 text-white transition-transform duration-300 group-hover:translate-x-0.5 lg:h-4 lg:w-4" aria-hidden />
         </button>
       </div>
     </article>
@@ -104,18 +104,14 @@ function FestivalProductCard({ product, onViewDetails, imagePriority = false }) 
 function FestivalProductRail({ products, onViewDetails }) {
   return (
     <>
-      <div className="festival-product-rail flex gap-4 overflow-x-auto pb-3 pt-1 lg:hidden">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:hidden">
         {products.map((product, index) => (
-          <div
+          <FestivalProductCard
             key={product.id}
-            className="w-[82vw] max-w-[300px] shrink-0 snap-start sm:w-[280px]"
-          >
-            <FestivalProductCard
-              product={product}
-              imagePriority={index < 2}
-              onViewDetails={() => onViewDetails(product)}
-            />
-          </div>
+            product={product}
+            imagePriority={index < 4}
+            onViewDetails={() => onViewDetails(product)}
+          />
         ))}
       </div>
 
@@ -180,7 +176,7 @@ export default function FestivalSaleSection() {
             <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-lg shadow-red-500/25">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
+                  <span className="live-now-dot-glow absolute inline-flex h-full w-full rounded-full bg-white" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
                 </span>
                 Live Now
@@ -296,10 +292,6 @@ export default function FestivalSaleSection() {
                   </Link>
                 </div>
 
-                <p className="mt-4 flex items-center gap-2 text-xs font-medium text-charcoal-light lg:hidden">
-                  <span className="inline-block h-1 w-8 rounded-full bg-solar-400" />
-                  Swipe to explore festival deals
-                </p>
               </div>
 
               <div className="px-5 py-6 sm:px-8 sm:py-8">
@@ -326,18 +318,6 @@ export default function FestivalSaleSection() {
         onClose={() => setQuickViewProduct(null)}
       />
 
-      <style>{`
-        .festival-product-rail {
-          scroll-snap-type: x mandatory;
-          scroll-padding-inline: 1.25rem;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .festival-product-rail::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </>
   );
 }

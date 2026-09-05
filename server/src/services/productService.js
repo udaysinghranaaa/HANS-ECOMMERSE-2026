@@ -13,6 +13,10 @@ import {
   normalizeYouTubeVideoInput,
 } from '../utils/videoUrl.js';
 import { calculateGstPricing, normalizeGstFields } from '../utils/gst.js';
+import {
+  sanitizeProductDescription,
+  stripDescriptionText,
+} from '../utils/sanitizeProductDescription.js';
 import { getMemoryCached } from '../utils/memoryCache.js';
 import {
   applyActiveFestivalFields,
@@ -404,9 +408,11 @@ export const createProduct = async ({
     throw new ApiError(400, 'Product title is required');
   }
 
-  if (!description?.trim()) {
+  if (!stripDescriptionText(description)) {
     throw new ApiError(400, 'Product description is required');
   }
+
+  const sanitizedDescription = sanitizeProductDescription(description);
 
   if (!categoryId) {
     throw new ApiError(400, 'Product category is required');
@@ -448,7 +454,7 @@ export const createProduct = async ({
   const product = await prisma.product.create({
     data: {
       name: name.trim(),
-      description: description.trim(),
+      description: sanitizedDescription,
       price: Number(price),
       discountPercent: 0,
       images,
@@ -502,6 +508,14 @@ export const updateProduct = async (
 
   if (!existingProduct) {
     throw new ApiError(404, 'Product not found');
+  }
+
+  let sanitizedDescription;
+  if (description !== undefined) {
+    if (!stripDescriptionText(description)) {
+      throw new ApiError(400, 'Product description is required');
+    }
+    sanitizedDescription = sanitizeProductDescription(description);
   }
 
   const normalizedExistingImages = existingImages.map(normalizeStoredMediaUrl);
@@ -597,7 +611,7 @@ export const updateProduct = async (
     where: { id },
     data: {
       ...(name !== undefined ? { name: name.trim() } : {}),
-      ...(description !== undefined ? { description: description.trim() } : {}),
+      ...(description !== undefined ? { description: sanitizedDescription } : {}),
       ...(price !== undefined ? { price: Number(price) } : {}),
       discountPercent: 0,
       ...(categoryId !== undefined ? { categoryId } : {}),

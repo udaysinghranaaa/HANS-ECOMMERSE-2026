@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import ProductDescription from '@/components/shop/ProductDescription';
 import { ProductCardBadges } from '@/components/shop/ProductBadges';
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/bodyScrollLock';
 import {
@@ -123,9 +124,11 @@ export default function ProductQuickViewModal({
           </div>
 
           {product.description && (
-            <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-charcoal-light">
-              {product.description}
-            </p>
+            <ProductDescription
+              description={product.description}
+              className="mt-4"
+              clamp
+            />
           )}
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">

@@ -11,6 +11,7 @@ import {
   Video,
 } from 'lucide-react';
 import PageHeader from '@/admin/components/ui/PageHeader';
+import RichTextEditor from '@/admin/components/RichTextEditor';
 import { useGetAdminCategoriesQuery } from '@/services/categoriesApi';
 import {
   useCreateProductMutation,
@@ -18,6 +19,7 @@ import {
   useUpdateProductMutation,
 } from '@/services/productsApi';
 import { getGstPricing, stripMediaUrl } from '@/utils/format';
+import { isDescriptionEmpty } from '@/utils/productDescription';
 import {
   getYouTubeEmbedUrl,
   getYouTubeWatchUrl,
@@ -201,7 +203,7 @@ export default function AdminProductFormPage() {
       nextErrors.name = 'Product title is required';
     }
 
-    if (!form.description.trim()) {
+    if (isDescriptionEmpty(form.description)) {
       nextErrors.description = 'Description is required';
     }
 
@@ -742,11 +744,10 @@ export default function AdminProductFormPage() {
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             Description *
           </label>
-          <textarea
-            rows={5}
+          <RichTextEditor
             value={form.description}
-            onChange={(event) => updateField('description', event.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+            onChange={(value) => updateField('description', value)}
+            error={Boolean(errors.description)}
             placeholder="Describe the product features, use cases and benefits."
           />
           {errors.description && (

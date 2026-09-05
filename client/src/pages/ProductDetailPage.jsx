@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import GstPriceBreakdown from '@/components/shop/GstPriceBreakdown';
+import ProductDescription from '@/components/shop/ProductDescription';
 import RelatedProductsSection from '@/components/shop/RelatedProductsSection';
 import { ProductDetailBadges } from '@/components/shop/ProductBadges';
 import { ProductVideosSection } from '@/components/shop/ProductVideo';
@@ -233,9 +234,10 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            <p className="mt-5 break-words text-sm leading-relaxed text-charcoal-light sm:mt-6 sm:text-base">
-              {product.description}
-            </p>
+            <ProductDescription
+              description={product.description}
+              className="mt-5 sm:mt-6"
+            />
 
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
               <Button
