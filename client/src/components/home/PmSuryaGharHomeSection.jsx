@@ -38,6 +38,8 @@ export default function PmSuryaGharHomeSection() {
               src="/new.jpg"
               alt="Happy family with rooftop solar installation by HANS Solar Energy"
               className={`subsidy-hero-image aspect-[4/3] w-full rounded-2xl object-cover shadow-[0_20px_48px_rgba(15,23,42,0.14)] transition-transform duration-500 hover:scale-[1.01] sm:rounded-3xl lg:aspect-[16/10] lg:shadow-[0_24px_56px_rgba(15,23,42,0.16)] ${isVisible ? 'is-visible' : 'opacity-0'}`}
+              fetchPriority="low"
+              decoding="async"
               loading="lazy"
               decoding="async"
             />

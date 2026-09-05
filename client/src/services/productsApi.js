@@ -24,7 +24,7 @@ export const productsApi = api.injectEndpoints({
     getFeaturedProducts: builder.query({
       query: () => '/catalog/products/featured',
       providesTags: [{ type: 'Products', id: 'FEATURED' }],
-      keepUnusedDataFor: 120,
+      keepUnusedDataFor: 300,
     }),
     getAdminProducts: builder.query({
       query: () => '/admin/catalog/products',

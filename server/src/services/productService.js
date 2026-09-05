@@ -13,6 +13,7 @@ import {
   normalizeYouTubeVideoInput,
 } from '../utils/videoUrl.js';
 import { calculateGstPricing, normalizeGstFields } from '../utils/gst.js';
+import { getMemoryCached } from '../utils/memoryCache.js';
 import {
   applyActiveFestivalFields,
   findActiveFestival,
@@ -258,26 +259,28 @@ export const getPublicProducts = async ({ categorySlug } = {}) => {
 };
 
 export const getFeaturedProducts = async () => {
-  const baseWhere = { isActive: true };
+  return getMemoryCached('public-featured-products', 45_000, async () => {
+    const baseWhere = { isActive: true };
 
-  const [activeFestival, trendingProducts, subsidyProducts] = await Promise.all([
-    findActiveFestival(),
-    prisma.product.findMany({
-      where: { ...baseWhere, isTrending: true },
-      include: productInclude,
-      orderBy: { updatedAt: 'desc' },
-    }),
-    prisma.product.findMany({
-      where: { ...baseWhere, isGovernmentSubsidy: true },
-      include: productInclude,
-      orderBy: { updatedAt: 'desc' },
-    }),
-  ]);
+    const [activeFestival, trendingProducts, subsidyProducts] = await Promise.all([
+      findActiveFestival(),
+      prisma.product.findMany({
+        where: { ...baseWhere, isTrending: true },
+        include: productInclude,
+        orderBy: { updatedAt: 'desc' },
+      }),
+      prisma.product.findMany({
+        where: { ...baseWhere, isGovernmentSubsidy: true },
+        include: productInclude,
+        orderBy: { updatedAt: 'desc' },
+      }),
+    ]);
 
-  return {
-    trendingProducts: formatPublicProducts(trendingProducts, activeFestival),
-    subsidyProducts: formatPublicProducts(subsidyProducts, activeFestival),
-  };
+    return {
+      trendingProducts: formatPublicProducts(trendingProducts, activeFestival),
+      subsidyProducts: formatPublicProducts(subsidyProducts, activeFestival),
+    };
+  });
 };
 
 export const getPublicProductById = async (id) => {

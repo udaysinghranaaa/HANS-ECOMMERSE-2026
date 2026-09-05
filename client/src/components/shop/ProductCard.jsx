@@ -17,6 +17,7 @@ export default function ProductCard({
   variant = 'default',
   showKeySpecs = false,
   maxKeySpecs = 3,
+  imagePriority = false,
 }) {
   const { openEnquiryModal } = useEnquiryModal();
   const imageUrl = product.images?.[0] || '';
@@ -70,7 +71,9 @@ export default function ProductCard({
             className={`h-full w-full object-cover transition-transform duration-500 ${
               isShop ? 'group-hover:scale-110' : 'group-hover:scale-105'
             }`}
-            loading="lazy"
+            loading={imagePriority ? 'eager' : 'lazy'}
+            fetchPriority={imagePriority ? 'high' : 'low'}
+            decoding="async"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-gray-400">

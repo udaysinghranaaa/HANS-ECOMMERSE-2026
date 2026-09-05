@@ -13,7 +13,7 @@ import {
   getFestivalProductPricing,
 } from '@/utils/format';
 
-function FestivalProductCard({ product, onViewDetails }) {
+function FestivalProductCard({ product, onViewDetails, imagePriority = false }) {
   const imageUrl = product.images?.[0] || '';
   const pricing = getFestivalProductPricing(
     product,
@@ -34,7 +34,9 @@ function FestivalProductCard({ product, onViewDetails }) {
               src={imageUrl}
               alt={product.name}
               className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
-              loading="lazy"
+              loading={imagePriority ? 'eager' : 'lazy'}
+              fetchPriority={imagePriority ? 'high' : 'low'}
+              decoding="async"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-gray-400">
@@ -103,13 +105,14 @@ function FestivalProductRail({ products, onViewDetails }) {
   return (
     <>
       <div className="festival-product-rail flex gap-4 overflow-x-auto pb-3 pt-1 lg:hidden">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <div
             key={product.id}
             className="w-[82vw] max-w-[300px] shrink-0 snap-start sm:w-[280px]"
           >
             <FestivalProductCard
               product={product}
+              imagePriority={index < 2}
               onViewDetails={() => onViewDetails(product)}
             />
           </div>
@@ -117,10 +120,11 @@ function FestivalProductRail({ products, onViewDetails }) {
       </div>
 
       <div className="hidden gap-5 lg:grid lg:grid-cols-3 xl:grid-cols-4">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <FestivalProductCard
             key={product.id}
             product={product}
+            imagePriority={index < 4}
             onViewDetails={() => onViewDetails(product)}
           />
         ))}

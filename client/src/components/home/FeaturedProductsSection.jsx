@@ -50,7 +50,7 @@ function ProductCarousel({ products, isVisible, sectionKey, fadeFrom }) {
             style={{ animationDelay: `${100 + index * 70}ms` }}
             className={`reveal-up min-w-0 ${isVisible ? 'is-visible' : ''}`}
           >
-            <ProductCard product={product} />
+            <ProductCard product={product} imagePriority={index < 4} />
           </div>
         ))}
       </div>
@@ -85,7 +85,7 @@ function ProductCarousel({ products, isVisible, sectionKey, fadeFrom }) {
             style={{ animationDelay: `${100 + index * 70}ms` }}
             className={`reveal-up w-[280px] shrink-0 snap-start sm:w-[300px] lg:w-[320px] ${isVisible ? 'is-visible' : ''}`}
           >
-            <ProductCard product={product} />
+            <ProductCard product={product} imagePriority={index < 2} />
           </div>
         ))}
       </div>

@@ -106,7 +106,7 @@ export const getPublicProductsHandler = catchAsync(async (req, res) => {
 export const getFeaturedProductsHandler = catchAsync(async (_req, res) => {
   const data = await getFeaturedProducts();
 
-  setPublicJsonCache(res, 30);
+  setPublicJsonCache(res, 120);
   res.status(200).json({
     success: true,
     data,

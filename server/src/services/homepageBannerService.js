@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js';
 import ApiError from '../utils/ApiError.js';
 import { deleteBannerFile, persistUploadedImage } from '../utils/fileUpload.js';
+import { getMemoryCached } from '../utils/memoryCache.js';
 import { toAbsoluteMediaUrl } from '../utils/mediaUrl.js';
 
 export const BANNER_POSITIONS = [1, 2, 3, 4];
@@ -126,15 +127,17 @@ const enrichBanners = async (banners) => {
 };
 
 export const getPublicHomepageBanners = async () => {
-  const banners = await prisma.homepageBanner.findMany({
-    where: {
-      isActive: true,
-      imageUrl: { not: '' },
-    },
-    orderBy: { position: 'asc' },
-  });
+  return getMemoryCached('public-homepage-banners', 60_000, async () => {
+    const banners = await prisma.homepageBanner.findMany({
+      where: {
+        isActive: true,
+        imageUrl: { not: '' },
+      },
+      orderBy: { position: 'asc' },
+    });
 
-  return enrichBanners(banners);
+    return enrichBanners(banners);
+  });
 };
 
 export const getAdminHomepageBanners = async () => {

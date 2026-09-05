@@ -132,9 +132,11 @@ const startServer = async () => {
 
     await connectDatabase();
 
-    runStartupInitialization(startupStartedAt).catch((error) => {
-      console.error('Startup initialization failed:', error.message);
-    });
+    setTimeout(() => {
+      runStartupInitialization(startupStartedAt).catch((error) => {
+        console.error('Startup initialization failed:', error.message);
+      });
+    }, 2000);
   } catch (error) {
     if (httpServer) {
       httpServer.close();

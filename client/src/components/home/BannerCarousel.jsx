@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGetPublicHomepageBannersQuery } from '@/services/homepageBannerApi';
-import { useGetPublicCategoriesQuery } from '@/services/categoriesApi';
 import {
   getBannerCtaLabel,
   isExternalHref,
@@ -146,14 +145,9 @@ function BannerSlide({ banner, categorySlugById, hasMultipleSlides }) {
 
 export default function BannerCarousel() {
   const { data, isLoading, isError } = useGetPublicHomepageBannersQuery();
-  const { data: categoriesData } = useGetPublicCategoriesQuery();
 
   const banners = data?.data?.banners ?? [];
-  const categorySlugById = useMemo(() => {
-    const categories = categoriesData?.data?.categories ?? [];
-
-    return new Map(categories.map((category) => [category.id, category.slug]));
-  }, [categoriesData]);
+  const categorySlugById = useMemo(() => new Map(), []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -164,6 +158,34 @@ export default function BannerCarousel() {
   const hasMultipleSlides = totalSlides > 1;
   const safeIndex =
     totalSlides > 0 ? ((currentIndex % totalSlides) + totalSlides) % totalSlides : 0;
+
+  useEffect(() => {
+    const firstBanner = banners[0];
+    if (!firstBanner) {
+      return undefined;
+    }
+
+    const preferDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    const href =
+      preferDesktop || !firstBanner.mobileImageUrl
+        ? firstBanner.imageUrl
+        : firstBanner.mobileImageUrl;
+
+    if (!href) {
+      return undefined;
+    }
+
+    const preload = document.createElement('link');
+    preload.rel = 'preload';
+    preload.as = 'image';
+    preload.href = href;
+    preload.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(preload);
+
+    return () => {
+      preload.remove();
+    };
+  }, [banners[0]?.imageUrl, banners[0]?.mobileImageUrl]);
 
   const goToSlide = useCallback(
     (index) => {
